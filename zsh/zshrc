@@ -135,3 +135,9 @@ echo -e "\033]6;1;bg;blue;brightness;33\a"
 export DOCKER_FOR_MAC_ENABLED=true
 source /Users/efarrell/Code/zendesk/zdi/dockmaster/zdi.sh
 # END ZDI
+# HSTR configuration - add this to ~/.bashrc
+alias hh=hstr                    # hh to be alias for hstr
+export HISTFILE=~/.zsh_history  # ensure history file visibility
+export HSTR_CONFIG=hicolor        # get more colors
+bindkey -s "\C-r" "\eqhstr\n"     # bind hstr to Ctrl-r (for Vi mode check doc)
+
