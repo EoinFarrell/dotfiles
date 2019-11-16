@@ -81,6 +81,11 @@ POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX="%{%B%F{black}%K{yellow}%} $user_symbo
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
+FILE=$ZSH_CUSTOM/plugins/zsh-autosuggestions
+if ! test -f "$FILE"; then
+    git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+fi
+
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
@@ -96,7 +101,7 @@ plugins=(
     zsh-autosuggestions
 )
 
-FILE=$HOMEs/.oh-my-zsh/custom/themes/powerlevel9k
+FILE=$HOME/.oh-my-zsh/custom/themes/powerlevel9k
 if ! test -f "$FILE"; then
     git clone https://github.com/bhilburn/powerlevel9k.git
 fi
