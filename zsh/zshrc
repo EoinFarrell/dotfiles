@@ -96,6 +96,11 @@ plugins=(
     zsh-autosuggestions
 )
 
+FILE=$HOMEs/.oh-my-zsh/custom/themes/powerlevel9k
+if ! test -f "$FILE"; then
+    git clone https://github.com/bhilburn/powerlevel9k.git
+fi
+
 source $ZSH/oh-my-zsh.sh
 
 source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
