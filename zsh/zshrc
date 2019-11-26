@@ -6,6 +6,12 @@ export ZSH="$HOME/.oh-my-zsh"
 
 export TERM="xterm-256color"
 
+THEMESD=$HOME/.oh-my-zsh/custom/themes
+DIRECTORY=$THEMESD/powerlevel9k
+if [ ! -d "$DIRECTORY" ]; then
+    git clone https://github.com/bhilburn/powerlevel9k.git $DIRECTORY
+fi
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -79,11 +85,12 @@ POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX="%{%B%F{black}%K{yellow}%} $user_symbo
 # HIST_STAMPS="mm/dd/yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
+ZSH_CUSTOM=$HOME/.oh-my-zsh/custom
 
-FILE=$ZSH_CUSTOM/plugins/zsh-autosuggestions
-if ! test -f "$FILE"; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+PLUGINSD=$ZSH_CUSTOM/plugins
+DIRECTORY=$PLUGINSD/zsh-autosuggestions
+if [ ! -d "$DIRECTORY" ]; then
+    git clone https://github.com/zsh-users/zsh-autosuggestions $DIRECTORY
 fi
 
 # Which plugins would you like to load?
@@ -100,11 +107,6 @@ plugins=(
     osx
     zsh-autosuggestions
 )
-
-FILE=$HOME/.oh-my-zsh/custom/themes/powerlevel9k
-if ! test -f "$FILE"; then
-    git clone https://github.com/bhilburn/powerlevel9k.git
-fi
 
 source $ZSH/oh-my-zsh.sh
 
