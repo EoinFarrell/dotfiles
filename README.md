@@ -1,5 +1,14 @@
 # dotfiles
 
+## How To
+
+### Symlink - Create
+ln -s ~/Code/dotfiles/... ~/.
+
+### SymLink - Update
+ln -sf ~/Code/dotfiles/... ~/.
+
+
 ## Links
 
 https://github.com/robbyrussell/oh-my-zsh/blob/master/README.md
