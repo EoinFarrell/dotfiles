@@ -8,7 +8,25 @@ alias la='ls -a'
 alias lla='ls -la'
 alias lt='ls --tree'
 
-# HSTR configuration - add this to ~/.bashrc
+## History Settings
+# leading space hides commands from history
+export HISTCONTROL=ignorespace
+# increase history file size (default is 500)
+export HISTFILESIZE=10000
+# increase history size (default is 500)
+export HISTSIZE=${HISTFILESIZE}
+#set history size
+export HISTSIZE=10000
+#save history after logout
+export SAVEHIST=10000
+#append into history file
+setopt INC_APPEND_HISTORY
+#save only one command if 2 common are same and consistent
+setopt HIST_IGNORE_DUPS
+#add timestamp for each entry
+setopt EXTENDED_HISTORY   
+
+# HSTR configuration
 alias hh=hstr                    # hh to be alias for hstr
 export HISTFILE=~/.zsh_history  # ensure history file visibility
 export HSTR_CONFIG=hicolor        # get more colors
