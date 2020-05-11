@@ -1,5 +1,5 @@
 DOTFILES=~/Code/dotfiles
-alias weather="curl http://v2.wttr.in"
+alias weather="curl http://v2.wttr.in/dublin"
 
 #LSD
 alias ls='lsd'
