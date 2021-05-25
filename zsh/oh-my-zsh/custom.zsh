@@ -87,3 +87,9 @@ source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
 
 # The next line enables zsh completion for gcloud.
 source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
+
+# Add alias for todo.txt
+export TODOTXT_DEFAULT_ACTION=ls
+alias t='todo.sh'
+# Add auto completion for todo.txt
+complete -F _todo t
