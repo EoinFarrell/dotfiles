@@ -1,0 +1,1 @@
+bind generic 9 !@sh -c "git rev-parse --short %(commit) | awk 1 ORS=' ' | pbcopy"

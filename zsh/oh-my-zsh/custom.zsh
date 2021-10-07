@@ -41,9 +41,9 @@ echo -e "\033]6;1;bg;blue;brightness;33\a"
 export TERM="xterm-256color"
 
 THEMESD=$HOME/.oh-my-zsh/custom/themes
-DIRECTORY=$THEMESD/powerlevel9k
+DIRECTORY=$THEMESD/powerlevel10k
 if [ ! -d "$DIRECTORY" ]; then
-    git clone https://github.com/bhilburn/powerlevel9k.git $DIRECTORY
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $DIRECTORY
 fi
 
 # Set name of the theme to load --- if set to "random", it will
@@ -51,9 +51,9 @@ fi
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 # ZSH_THEME="robbyrussell"
-ZSH_THEME="powerlevel9k/powerlevel9k"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir rbenv vcs)
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)
 POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(kubecontext time)
 POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
@@ -68,10 +68,10 @@ if [[ $(print -P "%#") =~ "#" ]]; then
 fi
 POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX="%{%B%F{black}%K{yellow}%} $user_symbol%{%b%f%k%F{yellow}%} %{%f%}"
 
-eval "$(rbenv init -)"
+# eval "$(rbenv init -)"
 
-export PATH="$HOME/.jenv/bin:$PATH"
-eval "$(jenv init -)"
+# export PATH="$HOME/.jenv/bin:$PATH"
+# eval "$(jenv init -)"
 
 # eval $(minikube docker-env)
 
@@ -88,11 +88,11 @@ source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
 # The next line enables zsh completion for gcloud.
 source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
 
-# Add alias for todo.txt
-export TODOTXT_DEFAULT_ACTION=ls
-alias t='todo.sh'
-# Add auto completion for todo.txt
-complete -F _todo t
+# # Add alias for todo.txt
+# export TODOTXT_DEFAULT_ACTION=ls
+# alias t='todo.sh'
+# # Add auto completion for todo.txt
+# complete -F _todo t
 
 # Autocomplete for zsh
 source <(kubectl completion zsh)
@@ -100,3 +100,7 @@ source <(kubectl completion zsh)
 alias k="kubectl"
 alias k=kubecolor
 complete -F __start_kubectl k
+
+source ~/Code/zendesk/kubectl_config/dotfiles/kubectl_stuff.bash
+
+. ~/.asdf/plugins/java/set-java-home.zsh
