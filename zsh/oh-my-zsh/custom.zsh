@@ -82,11 +82,12 @@ export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
 test -d "${GOPATH}" || mkdir "${GOPATH}"
 test -d "${GOPATH}/src/github.com" || mkdir -p "${GOPATH}/src/github.com"
 
+# Google Cloud Builder Sdk
 # The next line updates PATH for the Google Cloud SDK.
 source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
-
 # The next line enables zsh completion for gcloud.
 source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
+export CLOUDSDK_PYTHON=python3
 
 # # Add alias for todo.txt
 # export TODOTXT_DEFAULT_ACTION=ls
@@ -104,3 +105,5 @@ complete -F __start_kubectl k
 source ~/Code/zendesk/kubectl_config/dotfiles/kubectl_stuff.bash
 
 . ~/.asdf/plugins/java/set-java-home.zsh
+
+alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
