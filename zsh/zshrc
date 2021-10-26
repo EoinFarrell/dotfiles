@@ -108,6 +108,8 @@ source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+eval "$(saml2aws --completion-script-zsh)"
 # BEGIN ZDI
 export DOCKER_FOR_MAC_ENABLED=true
 source /Users/efarrell/Code/zendesk/zdi/dockmaster/zdi.sh
