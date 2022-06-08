@@ -1,4 +1,10 @@
 DOTFILES=~/Code/dotfiles
+
+# Restart Docker for Mac
+# https://forums.docker.com/t/restart-docker-from-command-line/9420/8
+
+alias docker-restart="docker ps -q | xargs -I id sh -c 'docker stop id && docker rm id' && test -z "$(docker ps -q 2>/dev/null)" && osascript -e 'quit app \"Docker\"' && open -g /Applications/Docker.app && while ! docker system info > /dev/null 2>&1; do sleep 1; done && docker system prune -f --volumes"
+
 alias weather="curl http://v2.wttr.in/dublin"
 
 #LSD
@@ -54,10 +60,30 @@ fi
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(kubecontext time)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(kubecontext)
 POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
 POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='red'
+
+POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
+POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+POWERLEVEL9K_DIR_TRUNCATE_BEFORE_MARKER=false
+# Don't shorten this many last directory segments. They are anchors.
+POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+# Shorten directory if it's longer than this even if there is space for it. The value can
+# be either absolute (e.g., '80') or a percentage of terminal width (e.g, '50%'). If empty,
+# directory will be shortened only when prompt doesn't fit or when other parameters demand it
+# (see POWERLEVEL9K_DIR_MIN_COMMAND_COLUMNS and POWERLEVEL9K_DIR_MIN_COMMAND_COLUMNS_PCT below).
+# If set to `0`, directory will always be shortened to its minimum length.
+POWERLEVEL9K_DIR_MAX_LENGTH=50
+
+# Enable special styling for non-writable and non-existent directories. See POWERLEVEL9K_LOCK_ICON
+# and POWERLEVEL9K_DIR_CLASSES below.
+POWERLEVEL9K_DIR_SHOW_WRITABLE=v3
+
+# The default icon shown next to non-writable and non-existent directories when
+# POWERLEVEL9K_DIR_SHOW_WRITABLE is set to v3.
+POWERLEVEL9K_LOCK_ICON='∅'
 
 # Add a space in the first prompt
 POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX="%f"
@@ -107,3 +133,6 @@ source ~/Code/zendesk/kubectl_config/dotfiles/kubectl_stuff.bash
 . ~/.asdf/plugins/java/set-java-home.zsh
 
 alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
+. /usr/local/opt/asdf/asdf.sh
+
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
