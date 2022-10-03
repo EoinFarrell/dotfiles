@@ -1,4 +1,4 @@
-DOTFILES=~/Code/dotfiles
+DOTFILES=~/Code/personal/dotfiles
 
 # Restart Docker for Mac
 # https://forums.docker.com/t/restart-docker-from-command-line/9420/8
@@ -50,7 +50,10 @@ THEMESD=$HOME/.oh-my-zsh/custom/themes
 DIRECTORY=$THEMESD/powerlevel10k
 if [ ! -d "$DIRECTORY" ]; then
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $DIRECTORY
+else 
+    git -C $DIRECTORY pull
 fi
+source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -110,10 +113,10 @@ test -d "${GOPATH}/src/github.com" || mkdir -p "${GOPATH}/src/github.com"
 
 # Google Cloud Builder Sdk
 # The next line updates PATH for the Google Cloud SDK.
-source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
+# source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
 # The next line enables zsh completion for gcloud.
-source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
-export CLOUDSDK_PYTHON=python3
+# source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
+# export CLOUDSDK_PYTHON=python3
 
 # # Add alias for todo.txt
 # export TODOTXT_DEFAULT_ACTION=ls
@@ -127,8 +130,6 @@ source <(kubectl completion zsh)
 alias k="kubectl"
 alias k=kubecolor
 complete -F __start_kubectl k
-
-source ~/Code/zendesk/kubectl_config/dotfiles/kubectl_stuff.bash
 
 . ~/.asdf/plugins/java/set-java-home.zsh
 

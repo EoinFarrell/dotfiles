@@ -68,7 +68,24 @@ PLUGINSD=$ZSH_CUSTOM/plugins
 DIRECTORY=$PLUGINSD/zsh-autosuggestions
 if [ ! -d "$DIRECTORY" ]; then
     git clone https://github.com/zsh-users/zsh-autosuggestions $DIRECTORY
+else
+    git -C $DIRECTORY pull
 fi
+
+DIRECTORY=$PLUGINSD/zsh-syntax-highlighting
+if [ ! -d "$DIRECTORY" ]; then
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting $DIRECTORY
+else
+    git -C $DIRECTORY pull
+fi
+
+DIRECTORY=$PLUGINSD/zsh-completions
+if [ ! -d "$DIRECTORY" ]; then
+    git clone https://github.com/zsh-users/zsh-completions $DIRECTORY
+else
+    git -C $DIRECTORY pull
+fi
+fpath+=$DIRECTORY/src
 
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
@@ -84,11 +101,10 @@ plugins=(
     kubectl
     macos
     zsh-autosuggestions
+    zsh-syntax-highlighting
 )
 
 source $ZSH/oh-my-zsh.sh
-
-source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # User configuration
 
@@ -116,11 +132,10 @@ source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-eval "$(saml2aws --completion-script-zsh)"
-# BEGIN ZDI
+# eval "$(saml2aws --completion-script-zsh)"
+
 export DOCKER_FOR_MAC_ENABLED=true
-source /Users/efarrell/Code/zendesk/zdi/dockmaster/zdi.sh
-# END ZDI
+
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 # [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
