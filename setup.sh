@@ -52,3 +52,6 @@ curl -fsSL https://get.jetpack.io/devbox | bash
 #gui apps
 brew install --cask zoom
 brew install --cask slack
+brew install --cask jetbrains-toolbox
+brew install docker
+brew install docker-compose
