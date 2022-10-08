@@ -1,5 +1,3 @@
-DOTFILES=~/Code/personal/dotfiles
-
 # Restart Docker for Mac
 # https://forums.docker.com/t/restart-docker-from-command-line/9420/8
 
@@ -46,13 +44,6 @@ echo -e "\033]6;1;bg;blue;brightness;33\a"
 
 export TERM="xterm-256color"
 
-THEMESD=$HOME/.oh-my-zsh/custom/themes
-DIRECTORY=$THEMESD/powerlevel10k
-if [ ! -d "$DIRECTORY" ]; then
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $DIRECTORY
-else 
-    git -C $DIRECTORY pull
-fi
 source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme
 
 # Set name of the theme to load --- if set to "random", it will

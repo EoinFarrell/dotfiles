@@ -64,28 +64,7 @@ DISABLE_UPDATE_PROMPT="true"
 # Would you like to use another custom folder than $ZSH/custom?
 ZSH_CUSTOM=$HOME/.oh-my-zsh/custom
 
-PLUGINSD=$ZSH_CUSTOM/plugins
-DIRECTORY=$PLUGINSD/zsh-autosuggestions
-if [ ! -d "$DIRECTORY" ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions $DIRECTORY
-else
-    git -C $DIRECTORY pull
-fi
-
-DIRECTORY=$PLUGINSD/zsh-syntax-highlighting
-if [ ! -d "$DIRECTORY" ]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting $DIRECTORY
-else
-    git -C $DIRECTORY pull
-fi
-
-DIRECTORY=$PLUGINSD/zsh-completions
-if [ ! -d "$DIRECTORY" ]; then
-    git clone https://github.com/zsh-users/zsh-completions $DIRECTORY
-else
-    git -C $DIRECTORY pull
-fi
-fpath+=$DIRECTORY/src
+source $ZSH_CUSTOM/init.sh
 
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
