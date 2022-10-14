@@ -55,3 +55,6 @@ brew install docker-compose
 brew install --cask spotify
 brew install --cask firefox
 brew install --cask visual-studio-code
+
+brew install kubectl
+brew install kubecolor/tap/kubecolor

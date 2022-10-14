@@ -38,9 +38,9 @@ export HSTR_CONFIG=hicolor        # get more colors
 
 # Colorise the top Tabs of Iterm2 with the same color as background
 # Just change the 18/26/33 wich are the rgb values
-echo -e "\033]6;1;bg;red;brightness;18\a"
-echo -e "\033]6;1;bg;green;brightness;26\a"
-echo -e "\033]6;1;bg;blue;brightness;33\a"
+# echo -e "\033]6;1;bg;red;brightness;18\a"
+# echo -e "\033]6;1;bg;green;brightness;26\a"
+# echo -e "\033]6;1;bg;blue;brightness;33\a"
 
 export TERM="xterm-256color"
 
@@ -115,16 +115,14 @@ test -d "${GOPATH}/src/github.com" || mkdir -p "${GOPATH}/src/github.com"
 # # Add auto completion for todo.txt
 # complete -F _todo t
 
-# Autocomplete for zsh
+# get zsh complete kubectl
 source <(kubectl completion zsh)
+alias kubectl=kubecolor
+# make completion work with kubecolor
+compdef kubecolor=kubectl
 
-alias k="kubectl"
-alias k=kubecolor
-complete -F __start_kubectl k
+# . ~/.asdf/plugins/java/set-java-home.zsh
+# alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
+# . /usr/local/opt/asdf/asdf.sh
 
-. ~/.asdf/plugins/java/set-java-home.zsh
-
-alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
-. /usr/local/opt/asdf/asdf.sh
-
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+# export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
