@@ -44,6 +44,14 @@ export HSTR_CONFIG=hicolor        # get more colors
 
 export TERM="xterm-256color"
 
+function prompt_my_devbox() {
+    if [[ -z "${DEVBOX_SHELL_ENABLED}" ]]; then
+        return
+    else
+        p10k segment -i '</>' -f blue
+    fi
+  }
+
 source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme
 
 # Set name of the theme to load --- if set to "random", it will
@@ -54,7 +62,7 @@ source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(kubecontext)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(kubecontext my_devbox)
 POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
 POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='red'
@@ -96,11 +104,11 @@ POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX="%{%B%F{black}%K{yellow}%} $user_symbo
 # eval $(minikube docker-env)
 
 # Go development
-export GOPATH="${HOME}/.go"
-export GOROOT="$(brew --prefix golang)/libexec"
-export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
-test -d "${GOPATH}" || mkdir "${GOPATH}"
-test -d "${GOPATH}/src/github.com" || mkdir -p "${GOPATH}/src/github.com"
+# export GOPATH="${HOME}/.go"
+# export GOROOT="$(brew --prefix golang)/libexec"
+# export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
+# test -d "${GOPATH}" || mkdir "${GOPATH}"
+# test -d "${GOPATH}/src/github.com" || mkdir -p "${GOPATH}/src/github.com"
 
 # Google Cloud Builder Sdk
 # The next line updates PATH for the Google Cloud SDK.
