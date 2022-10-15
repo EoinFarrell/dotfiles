@@ -58,3 +58,5 @@ brew install --cask visual-studio-code
 
 brew install kubectl
 brew install kubecolor/tap/kubecolor
+
+brew install --cask obsidian
