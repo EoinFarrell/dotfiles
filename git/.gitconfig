@@ -2,3 +2,5 @@
 [user]
 	name = Eoin Farrell
 	email = me@eoinfarrell.dev
+[core]
+	excludesFile = ~/.gitignore

@@ -24,6 +24,7 @@ ln -s ~/Code/personal/dotfiles/zsh/oh-my-zsh/custom.zsh ~/.oh-my-zsh/custom/cust
 ln -s ~/Code/personal/dotfiles/zsh/init.sh ~/.oh-my-zsh/custom/init.sh
 chsh -s /usr/local/bin/zsh
 
+ln -s ~/Code/personal/dotfiles/git/.gitignore ~/.gitignore
 ln -s ~/Code/personal/dotfiles/git/.gitconfig ~/.gitconfig
 ln -s ~/Code/personal/dotfiles/tmux/.tmux.conf ~/.tmux.conf
 ln -s ~/Code/personal/dotfiles/tig/.tigrc ~/.tigrc
@@ -58,5 +59,6 @@ brew install --cask visual-studio-code
 
 brew install kubectl
 brew install kubecolor/tap/kubecolor
+brew install jq
 
 brew install --cask obsidian
