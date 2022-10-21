@@ -21,6 +21,7 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 rm ~/.zshrc
 ln -s ~/Code/personal/dotfiles/zsh/zshrc ~/.zshrc
 ln -s ~/Code/personal/dotfiles/zsh/oh-my-zsh/custom.zsh ~/.oh-my-zsh/custom/custom.zsh
+ln -s ~/Code/personal/dotfiles/zsh/oh-my-zsh/powerlevel10k.zsh ~/.oh-my-zsh/custom/powerlevel10k.zsh
 ln -s ~/Code/personal/dotfiles/zsh/init.sh ~/.oh-my-zsh/custom/init.sh
 chsh -s /usr/local/bin/zsh
 
