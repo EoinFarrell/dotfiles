@@ -67,17 +67,17 @@ POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
 POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='red'
 
-POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
-POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+POWERLEVEL9K_DIR_PACKAGE_FILES=(devbox.json)
+POWERLEVEL9K_SHORTEN_STRATEGY=truncate_with_package_name
 POWERLEVEL9K_DIR_TRUNCATE_BEFORE_MARKER=false
 # Don't shorten this many last directory segments. They are anchors.
-POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+POWERLEVEL9K_SHORTEN_DIR_LENGTH=3
 # Shorten directory if it's longer than this even if there is space for it. The value can
 # be either absolute (e.g., '80') or a percentage of terminal width (e.g, '50%'). If empty,
 # directory will be shortened only when prompt doesn't fit or when other parameters demand it
 # (see POWERLEVEL9K_DIR_MIN_COMMAND_COLUMNS and POWERLEVEL9K_DIR_MIN_COMMAND_COLUMNS_PCT below).
 # If set to `0`, directory will always be shortened to its minimum length.
-POWERLEVEL9K_DIR_MAX_LENGTH=50
+POWERLEVEL9K_DIR_MAX_LENGTH=20
 
 # Enable special styling for non-writable and non-existent directories. See POWERLEVEL9K_LOCK_ICON
 # and POWERLEVEL9K_DIR_CLASSES below.
