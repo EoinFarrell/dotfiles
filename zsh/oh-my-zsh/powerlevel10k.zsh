@@ -4,7 +4,7 @@ function prompt_my_devbox() {
     else
         p10k segment -i '</>' -f blue
     fi
-  }
+}
 
 source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme
 
