@@ -4,3 +4,5 @@
 	email = me@eoinfarrell.dev
 [core]
 	excludesFile = ~/.gitignore
+[init]
+	defaultBranch = main
