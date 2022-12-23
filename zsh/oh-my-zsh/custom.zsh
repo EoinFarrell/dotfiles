@@ -1,3 +1,9 @@
+# Nix
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+# End Nix
+
 # Restart Docker for Mac
 # https://forums.docker.com/t/restart-docker-from-command-line/9420/8
 
