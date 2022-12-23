@@ -6,3 +6,5 @@
 	excludesFile = ~/.gitignore
 [init]
 	defaultBranch = main
+[push]
+	autoSetupRemote = true
