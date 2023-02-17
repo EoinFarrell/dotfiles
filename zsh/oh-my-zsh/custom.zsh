@@ -4,13 +4,6 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
 fi
 # End Nix
 
-# Restart Docker for Mac
-# https://forums.docker.com/t/restart-docker-from-command-line/9420/8
-
-alias docker-restart="docker ps -q | xargs -I id sh -c 'docker stop id && docker rm id' && test -z "$(docker ps -q 2>/dev/null)" && osascript -e 'quit app \"Docker\"' && open -g /Applications/Docker.app && while ! docker system info > /dev/null 2>&1; do sleep 1; done && docker system prune -f --volumes"
-
-alias weather="curl http://v2.wttr.in/dublin"
-
 #LSD
 alias ls='lsd'
 alias l='ls -l'
