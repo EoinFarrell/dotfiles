@@ -43,7 +43,7 @@ export HSTR_CONFIG=hicolor        # get more colors
 
 export TERM="xterm-256color"
 
-source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/powerlevel10k.zsh
+source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/
 
 # eval "$(rbenv init -)"
 
@@ -78,7 +78,15 @@ alias kubectl=kubecolor
 # make completion work with kubecolor
 compdef kubecolor=kubectl
 
-# . ~/.asdf/plugins/java/set-java-home.zsh
+
+# ASDF
+
+. "$HOME/.asdf/asdf.sh"
+# append completions to fpath
+fpath=(${ASDF_DIR}/completions $fpath)
+# initialise completions with ZSH's compinit
+autoload -Uz compinit && compinit
+. ~/.asdf/plugins/java/set-java-home.zsh
 # alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
 # . /usr/local/opt/asdf/asdf.sh
 

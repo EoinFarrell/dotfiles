@@ -15,6 +15,8 @@ brew install lsd
 brew install tig
 brew install gh
 
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.11.3
+
 gh auth login
 
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -30,6 +32,7 @@ ln -s ~/Code/personal/dotfiles/git/.gitconfig ~/.gitconfig
 ln -s ~/Code/personal/dotfiles/tmux/.tmux.conf ~/.tmux.conf
 ln -s ~/Code/personal/dotfiles/tig/.tigrc ~/.tigrc
 ln -s ~/Code/personal/dotfiles/vim/.vimrc ~/.vimrc
+ln -s ~/Code/personal/dotfiles/asdf/.asdfrc ~/.asdfrc
 
 # restart shell
 
@@ -63,3 +66,8 @@ brew install kubecolor/tap/kubecolor
 brew install jq
 
 brew install --cask obsidian
+
+# install https://getsynth.com
+# export SYNTH_INSTALL_PATH=~/bin
+# curl -sSL https://getsynth.com/install | sh
+# synth telemetry disable
