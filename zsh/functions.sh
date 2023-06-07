@@ -9,6 +9,14 @@ isInternetAvailable() {
     fi
 }
 
+isItermSession() {
+    if [ "$TERM_PROGRAM" != "iTerm.app" ]; then
+        echo "0"
+    else
+        echo "1"
+    fi
+}
+
 
 isTmuxSession() {
     if [ "$TERM_PROGRAM" != "tmux" ]; then
