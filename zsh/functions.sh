@@ -48,3 +48,11 @@ weather() {
         curl http://v2.wttr.in/dublin
     fi
 }   
+
+todo(){
+    if ! [ -z "$1" ]; then
+        echo "- ${1}" >> ~/Code/personal/notes.eoinfarrell.dev/TODO.md
+    else
+        mdcat ~/Code/personal/notes.eoinfarrell.dev/TODO.md
+    fi
+}

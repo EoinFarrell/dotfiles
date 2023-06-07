@@ -15,11 +15,11 @@ alias lt='ls --tree'
 # leading space hides commands from history
 export HISTCONTROL=ignorespace
 # increase history file size (default is 500)
-export HISTFILESIZE=10000
+export HISTFILESIZE=10000000
 # increase history size (default is 500)
 export HISTSIZE=${HISTFILESIZE}
 #set history size
-export HISTSIZE=10000
+export HISTSIZE=10000000
 #save history after logout
 export SAVEHIST=10000
 #append into history file
@@ -91,3 +91,12 @@ autoload -Uz compinit && compinit
 # . /usr/local/opt/asdf/asdf.sh
 
 # export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+export PATH="$HOME/Library/Python/3.9/bin:$PATH"
+
+#AWS
+
+#AWSume alias to source the AWSume script
+alias awsume="source awsume"
+#Auto-Complete function for AWSume
+fpath=(~/.awsume/zsh-autocomplete/ $fpath)
