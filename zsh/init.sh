@@ -1,4 +1,7 @@
 DOTFILES=~/Code/personal/dotfiles
+NOTES=~/Code/personal/notes.eoinfarrell.dev
+VMWARE=~/Code/VMWare
+CAUA=~/Code/VMWare/CAUA
 
 source $DOTFILES/zsh/functions.sh
 
@@ -23,6 +26,11 @@ getLatestPackages() {
     THEMESD=$HOME/.oh-my-zsh/custom/themes
     DIRECTORY=$THEMESD/powerlevel10k
     getLatestFromGit $DIRECTORY "https://github.com/romkatv/powerlevel10k.git"
+
+    $HOME/.asdf/bin/asdf update
+    tldr --update
+
+    python3 -m pip install --upgrade pip
   else
     echo 'Tmux session - Latest from Github not pulled'
   fi
