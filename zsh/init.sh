@@ -6,9 +6,9 @@ CAUA=~/Code/VMWare/CAUA
 source $DOTFILES/zsh/functions.sh
 
 getLatestPackages() {
-  func_result="$(isTmuxSession)"
+  func_result="$(isItermSession)"
 
-  if [ $func_result  -eq 0 ]; then
+  if [ $func_result  -eq 1 ]; then
     brew outdated
 
     PLUGINSD=$ZSH_CUSTOM/plugins
