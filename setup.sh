@@ -14,6 +14,7 @@ brew install hstr
 brew install lsd
 brew install tig
 brew install gh
+brew install tree
 
 git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.11.3
 
