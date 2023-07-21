@@ -18,16 +18,19 @@ export HISTCONTROL=ignorespace
 export HISTFILESIZE=10000000
 # increase history size (default is 500)
 export HISTSIZE=${HISTFILESIZE}
-#set history size
-export HISTSIZE=10000000
 #save history after logout
-export SAVEHIST=10000
-#append into history file
-setopt INC_APPEND_HISTORY
-#save only one command if 2 common are same and consistent
-setopt HIST_IGNORE_DUPS
-#add timestamp for each entry
-setopt EXTENDED_HISTORY   
+export SAVEHIST=10000000
+
+setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
+setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
+setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
+setopt SHARE_HISTORY             # Share history between all sessions.
+setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
 
 # HSTR configuration
 alias hh=hstr                    # hh to be alias for hstr
@@ -100,3 +103,14 @@ export PATH="$HOME/Library/Python/3.9/bin:$PATH"
 alias awsume="source awsume"
 #Auto-Complete function for AWSume
 fpath=(~/.awsume/zsh-autocomplete/ $fpath)
+
+export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
+export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
+export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
+export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
+export PATH=${PATH/\/Users\/eoinfarrell\/Library\/Application Support\/JetBrains\/Toolbox\/scripts:}
+export PATH=${PATH/\/Users\/eoinfarrell\/Library\/Application Support\/JetBrains\/Toolbox\/scripts}
+export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/local\/bin:}
+export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/bin:}
+export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/appleinternal\/bin:}
+
