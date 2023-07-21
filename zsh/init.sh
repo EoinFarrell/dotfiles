@@ -1,7 +1,6 @@
+PERSONAL=~/Code/personal
 DOTFILES=~/Code/personal/dotfiles
 NOTES=~/Code/personal/notes.eoinfarrell.dev
-VMWARE=~/Code/VMWare
-CAUA=~/Code/VMWare/CAUA
 
 source $DOTFILES/zsh/functions.sh
 
