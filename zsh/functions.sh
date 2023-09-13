@@ -46,8 +46,9 @@ dockerRestart() {
         open -g /Applications/Docker.app && 
         while ! docker system info > /dev/null 2>&1; do sleep 1; done && 
         docker system prune -f --volumes
-
 }
+
+alias docker-restart=$dockerRestart
 
 weather() {
     if ! [ -z "$1" ]; then
@@ -58,9 +59,11 @@ weather() {
 }   
 
 todo(){
-    if ! [ -z "$1" ]; then
-        echo "- ${1}" >> ~/Code/personal/notes.eoinfarrell.dev/TODO.md
-    else
-        mdcat ~/Code/personal/notes.eoinfarrell.dev/TODO.md
-    fi
+    source $DOTFILES/zsh/scripts/todo.sh $1 $2 $3 $4
+
+    # if ! [ -z "$1" ]; then
+    #     echo "- ${1}" >> $NOTES/TODO.md
+    # else
+    #     mdcat $NOTES/TODO.md
+    # fi
 }
