@@ -42,7 +42,7 @@ getLatestFromGit() {
 dockerRestart() {
     docker ps -q | xargs -I id sh -c 'docker stop id && docker rm id' && 
         test -z "$(docker ps -q 2>/dev/null)" && 
-        osascript -e 'quit app \"Docker\"' && 
+        osascript -e 'quit app "Docker"' && 
         open -g /Applications/Docker.app && 
         while ! docker system info > /dev/null 2>&1; do sleep 1; done && 
         docker system prune -f --volumes
