@@ -48,6 +48,14 @@ dockerRestart() {
         docker system prune -f --volumes
 }
 
+watchDocker() {
+    watch -n 5 'docker ps --format "table {{.Names}}\t{{.Status}}" -a'
+}
+
+watchK8Pods() {
+    watch -n 5 "kubectl get pods | grep $1"
+}
+
 alias docker-restart=$dockerRestart
 
 weather() {

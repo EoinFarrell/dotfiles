@@ -8,6 +8,7 @@ getLatestPackages() {
   func_result="$(isItermSession)"
 
   if [ $func_result  -eq 1 ]; then
+    docker system prune -f --volumes
     brew outdated
 
     PLUGINSD=$ZSH_CUSTOM/plugins
@@ -26,10 +27,10 @@ getLatestPackages() {
     DIRECTORY=$THEMESD/powerlevel10k
     getLatestFromGit $DIRECTORY "https://github.com/romkatv/powerlevel10k.git"
 
-    $HOME/.asdf/bin/asdf update
-    tldr --update
+    $HOME/.asdf/bin/asdf update &
+    tldr --update &
 
-    python3 -m pip install --upgrade pip
+    python3 -m pip install --upgrade pip &
   else
     echo 'Tmux session - Latest from Github not pulled'
   fi
