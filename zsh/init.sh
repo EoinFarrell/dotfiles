@@ -19,7 +19,11 @@ getLatestPackages() {
     DIRECTORY=$PLUGINSD/zsh-syntax-highlighting
     getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-syntax-highlighting"
 
-    DIRECTORY=$PLUGINSD/zsh-autosuggestions
+    DIRECTORY=$PLUGINSD/zsh-autocomplete
+    getLatestFromGit $DIRECTORY https://github.com/marlonrichert/zsh-autocomplete.git
+    # source $DIRECTORY/zsh-autocomplete.plugin.zsh
+
+    DIRECTORY=$PLUGINSD/zsh-completions
     getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-completions"
     fpath+=$DIRECTORY/src
 
