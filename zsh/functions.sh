@@ -30,7 +30,7 @@ getLatestFromGit() {
     func_result="$(isInternetAvailable)"
     if [ $func_result -eq 1 ]; then
         if [ ! -d "$1" ]; then
-            git clone $2 $1
+            git clone --depth 1 $2 $1
         else
             git -C $1 pull
         fi
@@ -67,11 +67,15 @@ weather() {
 }   
 
 todo(){
-    source $DOTFILES/zsh/scripts/todo.sh $1 $2 $3 $4
+    source $DOTFILES/zsh/scripts/todo.sh $1 todo $2 $3 $4
 
     # if ! [ -z "$1" ]; then
     #     echo "- ${1}" >> $NOTES/TODO.md
     # else
     #     mdcat $NOTES/TODO.md
     # fi
+}
+
+todo-demo(){
+    source $DOTFILES/zsh/scripts/todo.sh $1 demo $2
 }
