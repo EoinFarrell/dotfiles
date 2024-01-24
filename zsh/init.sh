@@ -13,6 +13,9 @@ getLatestPackages() {
 
     PLUGINSD=$ZSH_CUSTOM/plugins
 
+    DIRECTORY=$PLUGINSD/git-open
+    getLatestFromGit $DIRECTORY "https://github.com/paulirish/git-open.git"
+
     DIRECTORY=$PLUGINSD/zsh-autosuggestions
     getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-autosuggestions"
 

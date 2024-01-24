@@ -1,6 +1,4 @@
 #!/bin/bash
-todoFile=$NOTES/TODO.md
-
 # Function to add a new task to the todo list
 add_task() {
     local description="$1"
@@ -49,14 +47,22 @@ print_todo_list() {
 list_tasks_due_today() {
     local today=$(date +"%Y-%m-%d")
     echo "Tasks due today ($today):"
-    awk -v date="$today" -F' ' '$4 == date' $todoFile | grep -n "\[ ]"
+    awk -v date="$today" -F' ' '$5 == date' $todoFile | grep -n "\[ ]"
 }
+
+if [ "$2" = "todo" ]; then
+    todoFile=$NOTES/TODO.md
+elif [ "$2" = "demo" ]; then
+    todoFile=$NOTES/DEMO.md
+fi
 
 # Check if $todoFile file exists, otherwise create it
 if [ ! -f $todoFile ]; then
     touch $todoFile
     echo "# Todo List" >> $todoFile
 fi
+
+echo $1
 
 # Process command-line arguments
 if [ "$1" = "add" ]; then
@@ -66,7 +72,7 @@ if [ "$1" = "add" ]; then
     fi
 
     # Call the add_task function with the provided task description, category, and complete by date
-    add_task "$2" "$3" "$4"
+    add_task "$3" "$4" "$5"
 
 elif [ "$1" = "done" ]; then
     # Check if the task ID is provided
@@ -75,7 +81,7 @@ elif [ "$1" = "done" ]; then
     fi
 
     # Call the mark_task_as_done function with the provided task ID
-    mark_task_as_done "$2"
+    mark_task_as_done "$3"
 
 elif [ "$1" = "list" ]; then
     # Print the todo list without done tasks

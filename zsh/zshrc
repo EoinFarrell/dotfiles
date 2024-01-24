@@ -78,6 +78,8 @@ plugins=(
     git
     kubectl
     macos
+    git-open
+    zsh-autocomplete
     zsh-autosuggestions
     zsh-syntax-highlighting
 )
