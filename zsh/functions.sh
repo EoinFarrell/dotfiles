@@ -79,3 +79,7 @@ todo(){
 todo-demo(){
     source $DOTFILES/zsh/scripts/todo.sh $1 demo $2
 }
+
+cp-consts() {
+    source $DOTFILES/zsh/scripts/copy/copy.sh $1 $2 $3
+}
