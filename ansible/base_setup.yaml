@@ -8,13 +8,66 @@
     community.general.homebrew:
       update_homebrew: true
   - name: Install Casks
-    community.general.homebrew:
-      name: homebrew/cask/devtoys,homebrew/cask/disk-inventory-x,homebrew/cask/docker,homebrew/cask/firefox,homebrew/cask/grandperspective,homebrew/cask/http-toolkit,homebrew/cask/iterm2,homebrew/cask/jetbrains-toolbox,homebrew/cask/kdiff3,homebrew/cask/maccy,homebrew/cask/obsidian,homebrew/cask/postman,homebrew/cask/rectangle,homebrew/cask/slack,homebrew/cask/spotify,homebrew/cask/tigervnc-viewer,homebrew/cask/visual-studio-code,homebrew/cask/zoom
+    community.general.homebrew_cask:
+      name: "{{ item }}"
       state: latest
+    loop:
+      - devtoys
+      - disk-inventory-x
+      - docker
+      - firefox
+      - grandperspective
+      # - http-toolkit
+      - iterm2
+      - jetbrains-toolbox
+      - kdiff3
+      - maccy
+      - obsidian
+      - postman
+      - rectangle
+      - slack
+      - spotify
+      - tigervnc-viewer
+      - visual-studio-code
+      - zoom
   - name: Install Packages
     community.general.homebrew:
-      name: ansible,awscli,colima,coreutils,derailed/k9s/k9s,docker-compose,fzf,gh,git,guile,helm,hstr,hudochenkov/sshpass/sshpass,hugo,jq,kubecolor/tap/kubecolor,kubectx,lsd,mailhog,mdcat,mysql,openssl@1.1,prettier,protobuf,rsync,tig,tldr,tmux,tree,watch,wget,xo/xo/usql,zsh
+      name: "{{ item }}"
       state: latest
+    loop:
+      - ansible
+      - awscli
+      - colima
+      - coreutils
+      - derailed/k9s/k9s
+      - docker-compose
+      - fzf
+      - gh
+      - git
+      - guile
+      - helm
+      - hstr
+      - hudochenkov/sshpass/sshpass
+      - hugo
+      - jq
+      - kubecolor/tap/kubecolor
+      - kubectx
+      - lsd
+      - mailhog
+      - mdcat
+      - mysql
+      - openssl@1.1
+      - prettier
+      - protobuf
+      - rsync
+      - tig
+      - tldr
+      - tmux
+      - tree
+      - watch
+      - wget
+      - xo/xo/usql
+      - zsh
   - name: Setup Code dirs
     ansible.builtin.file:
       path: ~/Code/personal/dotfiles
@@ -22,19 +75,17 @@
       recurse: yes
   - name: Clone dotfiles
     ansible.builtin.git:
-    repo: 'https://github.com/EoinFarrell/dotfiles.git'
-    dest: ~/Code/personal/dotfiles
-    version: release-0.22
+      repo: 'https://github.com/EoinFarrell/dotfiles.git'
+      dest: ~/Code/personal/dotfiles
   - name: Setup asdf vm dirs
     ansible.builtin.file:
       path: ~/.asdf
       state: directory
       recurse: yes
-  - name: Clone dotfiles
+  - name: Clone asdfvm
     ansible.builtin.git:
-    repo: 'https://github.com/asdf-vm/asdf.git'
-    dest: ~/.asdf
-    version: release-0.22
+      repo: 'https://github.com/asdf-vm/asdf.git'
+      dest: ~/.asdf
   - name: Install Zsh
     command: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
   - name: Delete existing Zshrc
