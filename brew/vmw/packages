@@ -1,33 +1,33 @@
-ansible
-awscli
-colima
-coreutils
-derailed/k9s/k9s
-docker-compose
-fzf
-gh
-git
-guile
-helm
-hstr
-hudochenkov/sshpass/sshpass
-hugo
-jq
-kubecolor/tap/kubecolor
-kubectx
-lsd
-mailhog
-mdcat
-mysql
-openssl@1.1
-prettier
-protobuf
-rsync
-tig
-tldr
-tmux
-tree
-watch
-wget
-xo/xo/usql
-zsh
+- ansible
+- awscli
+- colima
+- coreutils
+- derailed/k9s/k9s
+- docker-compose
+- fzf
+- gh
+- git
+- guile
+- helm
+- hstr
+- hudochenkov/sshpass/sshpass
+- hugo
+- jq
+- kubecolor/tap/kubecolor
+- kubectx
+- lsd
+- mailhog
+- mdcat
+- mysql
+- openssl@1.1
+- prettier
+- protobuf
+- rsync
+- tig
+- tldr
+- tmux
+- tree
+- watch
+- wget
+- xo/xo/usql
+- zsh
