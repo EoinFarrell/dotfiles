@@ -1,0 +1,13 @@
+---
+# ansible-playbook -i inventory.ini monitoring/grafana-docker.yaml
+- name: "Iterm2 Setup"
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+  - name: Install Shell Integration
+    command: curl -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash
+  - name: Copy Plist
+    command: cp ~/Code/personal/dotfiles/iterm2/com.googlecode.iterm2.plist ~/Library/Preferences/com.googlecode.iterm2.plist
+  - name: Generate Dynamic Profile
+    script: ~/Code/personal/dotfiles/iterm2/setupDynamicProfile.sh
+  
