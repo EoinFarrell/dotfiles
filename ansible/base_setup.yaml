@@ -73,10 +73,14 @@
       path: ~/Code/personal/dotfiles
       state: directory
       recurse: yes
+  - name: List contents of directory
+    ansible.builtin.command: ls ~/Code/personal/dotfiles
+    register: dotfilesContents
   - name: Clone dotfiles
     ansible.builtin.git:
       repo: 'https://github.com/EoinFarrell/dotfiles.git'
       dest: ~/Code/personal/dotfiles
+    when: dotfilesContents.stdout == ""
   - name: Setup asdf vm dirs
     ansible.builtin.file:
       path: ~/.asdf
@@ -86,10 +90,21 @@
     ansible.builtin.git:
       repo: 'https://github.com/asdf-vm/asdf.git'
       dest: ~/.asdf
-  - name: Install Zsh
-    command: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  - name: List contents of directory
+    ansible.builtin.command: ls ~/.zshrc
+    register: ohMyZshContents
+  - name: Download Oh My Zsh Installer
+    command: wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    when: ohMyZshContents.stdout == ""
+  - name: Run Zsh Installer
+    command: sh install.sh
+    when: ohMyZshContents.stdout == ""
+  - name: Delete Zsh Installer
+    command: rm install.sh
+    when: ohMyZshContents.stdout == ""
   - name: Delete existing Zshrc
     command: rm ~/.zshrc
+    when: ohMyZshContents.stdout == ""
   - name: Create a symbolic links
     ansible.builtin.file:
       src: "{{ item.src }}"
@@ -106,8 +121,6 @@
       - { src: '~/Code/personal/dotfiles/tig/.tigrc' , dest: '~/.tigrc'}
       - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
       - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
-  - name: Change login shell
-    command: chsh -s /usr/local/bin/zsh
   
 
   
