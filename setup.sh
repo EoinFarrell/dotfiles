@@ -1,8 +1,9 @@
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-eval "$(/opt/homebrew/bin/brew shellenv)"   
+eval "$(/opt/homebrew/bin/brew shellenv)"
 brew install --cask iterm2
 
+brew install ansible
 brew install git
 
 mkdir Code && cd Code && mkdir personal && cd personal
@@ -16,7 +17,7 @@ brew install tig
 brew install gh
 brew install tree
 
-git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.11.3
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf #--branch v0.11.3
 
 gh auth login
 
