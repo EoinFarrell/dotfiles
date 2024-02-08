@@ -1,14 +1,18 @@
-# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-# echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-# eval "$(/opt/homebrew/bin/brew shellenv)"
-# brew install --cask iterm2
-# curl -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash
+# /bin/bash
 
-# brew install ansible
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+brew install ansible
+
 # brew install git
 
 # mkdir Code && cd Code && mkdir personal && cd personal
 # git clone https://github.com/EoinFarrell/dotfiles.git
+
+# brew install --cask iterm2
+# curl -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash
 
 # brew install tmux
 # brew install zsh
