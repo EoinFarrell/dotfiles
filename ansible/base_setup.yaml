@@ -1,0 +1,62 @@
+---
+# ansible-playbook -i inventory.ini monitoring/grafana-docker.yaml
+- name: "Base Setup"
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+  - name: Update Homebrew
+    community.general.homebrew:
+      update_homebrew: true
+  - name: Install Casks
+    community.general.homebrew:
+      name: homebrew/cask/devtoys,homebrew/cask/disk-inventory-x,homebrew/cask/docker,homebrew/cask/firefox,homebrew/cask/grandperspective,homebrew/cask/http-toolkit,homebrew/cask/iterm2,homebrew/cask/jetbrains-toolbox,homebrew/cask/kdiff3,homebrew/cask/maccy,homebrew/cask/obsidian,homebrew/cask/postman,homebrew/cask/rectangle,homebrew/cask/slack,homebrew/cask/spotify,homebrew/cask/tigervnc-viewer,homebrew/cask/visual-studio-code,homebrew/cask/zoom
+      state: latest
+  - name: Install Packages
+    community.general.homebrew:
+      name: ansible,awscli,colima,coreutils,derailed/k9s/k9s,docker-compose,fzf,gh,git,guile,helm,hstr,hudochenkov/sshpass/sshpass,hugo,jq,kubecolor/tap/kubecolor,kubectx,lsd,mailhog,mdcat,mysql,openssl@1.1,prettier,protobuf,rsync,tig,tldr,tmux,tree,watch,wget,xo/xo/usql,zsh
+      state: latest
+  - name: Setup Code dirs
+    ansible.builtin.file:
+      path: ~/Code/personal/dotfiles
+      state: directory
+      recurse: yes
+  - name: Clone dotfiles
+    ansible.builtin.git:
+    repo: 'https://github.com/EoinFarrell/dotfiles.git'
+    dest: ~/Code/personal/dotfiles
+    version: release-0.22
+  - name: Setup asdf vm dirs
+    ansible.builtin.file:
+      path: ~/.asdf
+      state: directory
+      recurse: yes
+  - name: Clone dotfiles
+    ansible.builtin.git:
+    repo: 'https://github.com/asdf-vm/asdf.git'
+    dest: ~/.asdf
+    version: release-0.22
+  - name: Install Zsh
+    command: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  - name: Delete existing Zshrc
+    command: rm ~/.zshrc
+  - name: Create a symbolic links
+    ansible.builtin.file:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      state: link
+    loop:
+      - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
+      - { src: '~/Code/personal/dotfiles/zsh/oh-my-zsh/custom.zsh' , dest: '~/.oh-my-zsh/custom/custom.zsh'}
+      - { src: '~/Code/personal/dotfiles/zsh/oh-my-zsh/powerlevel10k.zsh' , dest: '~/.oh-my-zsh/custom/powerlevel10k.zsh'}
+      - { src: '~/Code/personal/dotfiles/zsh/init.sh' , dest: '~/.oh-my-zsh/custom/init.sh'}
+      - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
+      - { src: '~/Code/personal/dotfiles/git/.gitconfig' , dest: '~/.gitconfig'}
+      - { src: '~/Code/personal/dotfiles/tmux/.tmux.conf' , dest: '~/.tmux.conf'}
+      - { src: '~/Code/personal/dotfiles/tig/.tigrc' , dest: '~/.tigrc'}
+      - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
+      - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
+  - name: Change login shell
+    command: chsh -s /usr/local/bin/zsh
+  
+
+  
