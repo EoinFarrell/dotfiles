@@ -4,10 +4,12 @@
   hosts: 127.0.0.1
   connection: local
   tasks:
+  - name: Download Shell Integration
+    command: wget https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh
   - name: Install Shell Integration
-    command: curl -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash
+    command: sh install_shell_integration_and_utilities.sh
+  - name: Delete Shell Integration
+    command: rm install_shell_integration_and_utilities.sh
   - name: Copy Plist
     command: cp ~/Code/personal/dotfiles/iterm2/com.googlecode.iterm2.plist ~/Library/Preferences/com.googlecode.iterm2.plist
-  - name: Generate Dynamic Profile
-    script: ~/Code/personal/dotfiles/iterm2/setupDynamicProfile.sh
   
