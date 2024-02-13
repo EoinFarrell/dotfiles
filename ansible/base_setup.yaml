@@ -18,6 +18,7 @@
       - disk-inventory-x
       - docker
       - firefox
+      - google-chrome
       - grandperspective
       # - http-toolkit
       - iterm2
