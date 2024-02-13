@@ -93,9 +93,9 @@
     ansible.builtin.git:
       repo: 'https://github.com/asdf-vm/asdf.git'
       dest: ~/.asdf
-  - name: Check ohMyZsh exists
+  - name: Check zshrc exists
     stat:
-      path: ~/.oh-my-zsh
+      path: ~/.zshrc
     register: ohMyZshContents
   - name: Download Oh My Zsh Installer
     command: wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
