@@ -34,7 +34,7 @@ getLatestPackages() {
     $HOME/.asdf/bin/asdf update &
     tldr --update &
 
-    python3 -m pip install --upgrade pip 
+    # python3 -m pip install --upgrade pip &
 }
 
 func_result="$(isItermSession)"
