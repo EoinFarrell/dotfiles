@@ -1,0 +1,21 @@
+---
+# ansible-playbook -i inventory.ini tldr_setup.yaml
+- name: "TLDR Setup"
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+  - name: Create dirs for symbolic links
+    ansible.builtin.file:
+      path: ~/Library/Application Support/tealdeer/pages
+      state: directory
+      recurse: yes
+  - name: Find all files in ~/commands
+    find:
+      paths: ~/Code/personal/notes.eoinfarrell.dev/tldr
+    register: find
+  - name: Create symlinks to /usr/local/bin
+    file:
+      src: "{{ item.path }}"
+      path: "~/Library/Application Support/tealdeer/pages/{{ item.path | basename }}"
+      state: link
+    with_items: "{{ find.files }}"

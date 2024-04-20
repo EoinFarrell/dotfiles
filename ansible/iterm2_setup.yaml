@@ -1,15 +1,41 @@
 ---
-# ansible-playbook -i inventory.ini monitoring/grafana-docker.yaml
+# ansible-playbook -i inventory.ini iterm2_setup.yaml
 - name: "Iterm2 Setup"
   hosts: 127.0.0.1
   connection: local
   tasks:
+  - name: Create iTerm dirs
+    file: 
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    loop: 
+      - "~/Library/Application\ Support/iTerm2/DynamicProfiles"
+      - "~/Library/Application\ Support/iTerm2/Scripts/AutoLaunch"
   - name: Download Shell Integration
-    command: wget https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh
+    command: wget2 https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh
   - name: Install Shell Integration
     command: sh install_shell_integration_and_utilities.sh
   - name: Delete Shell Integration
     command: rm install_shell_integration_and_utilities.sh
-  - name: Copy Plist
-    command: cp ~/Code/personal/dotfiles/iterm2/com.googlecode.iterm2.plist ~/Library/Preferences/com.googlecode.iterm2.plist
+  # - name: Link Plist
+  #   file: 
+  #     src: ~/Code/personal/dotfiles/iterm2/com.googlecode.iterm2.plist
+  #     path: ~/Library/Preferences/com.googlecode.iterm2.plist
+  #     state: link
+  #     force: true
+  # - name: Convert Profile to DynamicProfile
+  #   command: ../iterm2/setupDynamicProfile.sh
+  - name: Link DynamicProfile
+    file: 
+      src: ~/Code/personal/dotfiles/iterm2/Profiles.json
+      path: ~/Library/Application Support/iTerm2/DynamicProfiles/Profiles.json
+      state: link
+      force: true
+  - name: Link iTerm AutoLaunch Scripts 
+    file: 
+      src: ~/Code/personal/dotfiles/iterm2/change_default_profile.py
+      path: "~/Library/Application\ Support/iTerm2/Scripts/AutoLaunch/change_default_profile.py"
+      state: link
+      force: true
   

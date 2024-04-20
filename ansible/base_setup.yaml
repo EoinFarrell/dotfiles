@@ -1,14 +1,18 @@
 ---
-# ansible-playbook -i inventory.ini monitoring/grafana-docker.yaml
+# ansible-playbook -i inventory.ini base_setup.yaml
 - name: "Base Setup"
   hosts: 127.0.0.1
   connection: local
   tasks:
-  - name: Example from an Ansible Playbook
-    ansible.builtin.ping:
-  #- name: Update Homebrew
-  #  community.general.homebrew:
-  #    update_homebrew: true
+  - name: Update Homebrew
+    community.general.homebrew:
+     update_homebrew: true
+  - name: Remove Casks
+    community.general.homebrew:
+      name: "homebrew/cask/{{ item }}"
+      state: absent
+    loop:
+    - obsidian
   - name: Install Casks
     community.general.homebrew:
       name: "homebrew/cask/{{ item }}"
@@ -18,21 +22,26 @@
       - disk-inventory-x
       - docker
       - firefox
-      - google-chrome
+      # - google-chrome
       - grandperspective
       # - http-toolkit
       - iterm2
       - jetbrains-toolbox
       - kdiff3
       - maccy
-      - obsidian
       - postman
       - rectangle
-      - slack
+      # - slack
       - spotify
       - tigervnc-viewer
       - visual-studio-code
-      - zoom
+      # - zoom
+  - name: Remove Packages
+    community.general.homebrew:
+      name: "{{ item }}"
+      state: absent
+    loop:
+    - fzf
   - name: Install Packages
     community.general.homebrew:
       name: "{{ item }}"
@@ -44,7 +53,6 @@
       - coreutils
      # - derailed/k9s/k9s
       - docker-compose
-      - fzf
       - gh
       - git
       - guile
@@ -54,7 +62,9 @@
       - hugo
       - jq
      # - kubecolor/tap/kubecolor
+      - kubectl
       - kubectx
+      - kubecolor
       - lsd
       - mailhog
       - mdcat
@@ -64,27 +74,23 @@
       - protobuf
       - rsync
       - tig
-      - tldr
+      - tealdeer #tldr in rust
       - tmux
       - tree
       - watch
-      - wget
+      - wget2
      # - xo/xo/usql
       - zsh
-  - name: Setup Code dirs
-    ansible.builtin.file:
-      path: ~/Code/personal/dotfiles
-      state: directory
-      recurse: yes
-  - name: Check Dotfiles exists
-    stat:
-      path: ~/Code/personal/dotfiles
-    register: dotfilesContents
-  - name: Clone dotfiles
-    ansible.builtin.git:
-      repo: 'https://github.com/EoinFarrell/dotfiles.git'
-      dest: ~/Code/personal/dotfiles
-    when: not dotfilesContents.stat.exists
+  - name: Tap Homebrew repositorys
+    community.general.homebrew_tap:
+      name: localsend/localsend
+      state: present
+  - name: Install Tap Packages
+    community.general.homebrew:
+      name: "{{ item }}"
+      state: latest
+    loop:
+      - localsend
   - name: Setup asdf vm dirs
     ansible.builtin.file:
       path: ~/.asdf
@@ -99,7 +105,7 @@
       path: ~/.zshrc
     register: ohMyZshContents
   - name: Download Oh My Zsh Installer
-    command: wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    command: wget2 https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
     when: not ohMyZshContents.stat.exists
   - name: Run Zsh Installer
     command: sh install.sh
@@ -110,22 +116,9 @@
   - name: Delete existing Zshrc
     command: rm ~/.zshrc
     when: not ohMyZshContents.stat.exists
-  - name: Create a symbolic links
-    ansible.builtin.file:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-      state: link
+  - name: Install Fonts
+    ansible.builtin.copy:
+      src: "~/Code/personal/dotfiles/fonts/{{ item }}"
+      dest: "/Library/Fonts/{{ item }}"
     loop:
-      - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
-      - { src: '~/Code/personal/dotfiles/zsh/oh-my-zsh/custom.zsh' , dest: '~/.oh-my-zsh/custom/custom.zsh'}
-      - { src: '~/Code/personal/dotfiles/zsh/oh-my-zsh/powerlevel10k.zsh' , dest: '~/.oh-my-zsh/custom/powerlevel10k.zsh'}
-      - { src: '~/Code/personal/dotfiles/zsh/init.sh' , dest: '~/.oh-my-zsh/custom/init.sh'}
-      - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
-      - { src: '~/Code/personal/dotfiles/git/.gitconfig' , dest: '~/.gitconfig'}
-      - { src: '~/Code/personal/dotfiles/tmux/.tmux.conf' , dest: '~/.tmux.conf'}
-      - { src: '~/Code/personal/dotfiles/tig/.tigrc' , dest: '~/.tigrc'}
-      - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
-      - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
-  
-
-  
+      - "Meslo LG M Regular for Powerline.ttf"
