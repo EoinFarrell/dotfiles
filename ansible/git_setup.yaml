@@ -1,0 +1,35 @@
+---
+# ansible-playbook -i inventory.ini git_setup.yaml
+- name: "Git Setup"
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+  - name: Setup Code dirs
+    ansible.builtin.file:
+      path: ~/Code/personal
+      state: directory
+      recurse: yes
+  - name: Clone personal repos
+    ansible.builtin.git:
+      repo: "https://github.com/EoinFarrell/{{ item }}.git"
+      dest: ~/Code/personal/{{ item }}
+      update: no
+    loop:
+      - dotfiles
+      - notes.eoinfarrell.dev
+  - name: Create a symbolic links
+    ansible.builtin.file:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      state: link
+    loop:
+      - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
+      - { src: '~/Code/personal/dotfiles/zsh/oh-my-zsh/custom.zsh' , dest: '~/.oh-my-zsh/custom/custom.zsh'}
+      - { src: '~/Code/personal/dotfiles/zsh/oh-my-zsh/powerlevel10k.zsh' , dest: '~/.oh-my-zsh/custom/powerlevel10k.zsh'}
+      - { src: '~/Code/personal/dotfiles/zsh/init.sh' , dest: '~/.oh-my-zsh/custom/init.sh'}
+      - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
+      - { src: '~/Code/personal/dotfiles/git/.gitconfig' , dest: '~/.gitconfig'}
+      - { src: '~/Code/personal/dotfiles/tmux/.tmux.conf' , dest: '~/.tmux.conf'}
+      - { src: '~/Code/personal/dotfiles/tig/.tigrc' , dest: '~/.tigrc'}
+      - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
+      - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}

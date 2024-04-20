@@ -25,3 +25,8 @@ cd fonts
 # clean-up a bit
 cd ..
 rm -rf fonts
+
+# TODO
+
+- Ansible improvements
+  - https://github.com/jamesdh/dotfiles/blob/8fbe5409c6bb26bce9d50e2328359f5a37edd716/roles/osx/tasks/per_app/iterm.yml
