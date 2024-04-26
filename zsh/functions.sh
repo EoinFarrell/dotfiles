@@ -87,3 +87,7 @@ cp-consts() {
 codec(){
     cd $1 && code .
 }
+
+cdc(){
+    codec $1
+}
