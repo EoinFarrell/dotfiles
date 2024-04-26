@@ -83,3 +83,7 @@ todo-demo(){
 cp-consts() {
     source $DOTFILES/zsh/scripts/copy/copy.sh $1 $2 $3
 }
+
+codec(){
+    cd $1 && code .
+}
