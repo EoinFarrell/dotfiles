@@ -1,3 +1,4 @@
+CODE=~/Code
 PERSONAL=~/Code/personal
 DOTFILES=~/Code/personal/dotfiles
 NOTES=~/Code/personal/notes.eoinfarrell.dev
