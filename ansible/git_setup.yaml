@@ -24,8 +24,6 @@
       state: link
     loop:
       - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
-      - { src: '~/Code/personal/dotfiles/zsh/oh-my-zsh/custom.zsh' , dest: '~/.oh-my-zsh/custom/custom.zsh'}
-      - { src: '~/Code/personal/dotfiles/zsh/oh-my-zsh/powerlevel10k.zsh' , dest: '~/.oh-my-zsh/custom/powerlevel10k.zsh'}
       - { src: '~/Code/personal/dotfiles/zsh/init.sh' , dest: '~/.oh-my-zsh/custom/init.sh'}
       - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
       - { src: '~/Code/personal/dotfiles/git/.gitconfig' , dest: '~/.gitconfig'}
@@ -33,3 +31,13 @@
       - { src: '~/Code/personal/dotfiles/tig/.tigrc' , dest: '~/.tigrc'}
       - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
       - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
+  - name: Find all custom zsh files
+    find:
+      paths: ~/Code/personal/dotfiles/zsh/oh-my-zsh
+    register: find
+  - name: ~/.oh-my-zsh/custom
+    file:
+      src: "{{ item.path }}"
+      path: "~/.oh-my-zsh/custom/{{ item.path | basename }}"
+      state: link
+    with_items: "{{ find.files }}"
