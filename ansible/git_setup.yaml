@@ -17,6 +17,13 @@
     loop:
       - dotfiles
       - notes.eoinfarrell.dev
+  - name: Create dirs for symbolic links
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      recurse: yes
+    loop:
+      - ~/.config/superfile
   - name: Create a symbolic links
     ansible.builtin.file:
       src: "{{ item.src }}"
@@ -31,6 +38,7 @@
       - { src: '~/Code/personal/dotfiles/tig/.tigrc' , dest: '~/.tigrc'}
       - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
       - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
+      - { src: '~/Code/personal/dotfiles/superfile/hotkeys.toml' , dest: '~/.config/superfile/hotkeys.toml'}
   - name: Find all custom zsh files
     find:
       paths: ~/Code/personal/dotfiles/zsh/oh-my-zsh

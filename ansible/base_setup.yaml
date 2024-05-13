@@ -73,6 +73,7 @@
       - prettier
       - protobuf
       - rsync
+      - superfile
       - tig
       - tealdeer #tldr in rust
       - tmux

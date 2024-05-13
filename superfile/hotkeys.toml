@@ -1,0 +1,2 @@
+select_item = ['enter', 'l', 'right']
+parent_directory = ['h', 'backspace', 'left']
