@@ -116,9 +116,13 @@
   - name: Delete existing Zshrc
     command: rm ~/.zshrc
     when: not ohMyZshContents.stat.exists
+  - name: Find all custom fonts
+    find:
+      paths: ~/Code/personal/dotfiles/fonts
+      patterns: '*.ttf'
+    register: findFonts
   - name: Install Fonts
     ansible.builtin.copy:
-      src: "~/Code/personal/dotfiles/fonts/{{ item }}"
-      dest: "/Library/Fonts/{{ item }}"
-    loop:
-      - "Meslo LG M Regular for Powerline.ttf"
+      src: "{{ item.path }}"
+      dest: "/Library/Fonts/{{ item.path | basename }}"
+    with_items: "{{ findFonts.files }}"
