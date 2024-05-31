@@ -90,7 +90,11 @@ fpath=(${ASDF_DIR}/completions $fpath)
 # initialise completions with ZSH's compinit
 # autoload -Uz compinit && compinit
 . ~/.asdf/plugins/java/set-java-home.zsh
-# alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
+
+# GO Setup
+. ~/.asdf/plugins/golang/set-env.zsh
+alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
+go-reshim
 # . /usr/local/opt/asdf/asdf.sh
 
 # export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
