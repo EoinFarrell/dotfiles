@@ -2,6 +2,9 @@ CODE=~/Code
 PERSONAL=~/Code/personal
 DOTFILES=~/Code/personal/dotfiles
 NOTES=~/Code/personal/notes.eoinfarrell.dev
+AWS_CONFIG=~/.aws
+KUBE_CONFIG=~/.kube
+SSH_CONFIG=~/.ssh
 
 source $DOTFILES/zsh/functions.sh
 
