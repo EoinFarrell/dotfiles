@@ -91,3 +91,55 @@ codec(){
 cdc(){
     codec $1
 }
+
+tm(){
+    if [ -z "$1" ]; then
+        tmux list-sessions
+        # read -p "Create new session ? " -n 1 -r
+
+        echo -n 'Create new auto-named session ?'
+        read REPLY
+        if [[ $REPLY =~ ^[Yy]$ ]]
+        then
+            name="$(basename $PWD)"
+            name="${name//\./-}"
+        fi
+        REPLY=
+    else
+        name=$1
+    fi
+
+    echo "Session name to use: $name"
+
+    tmux has -t "=$name" && tmux attach -t "$name" && exit
+
+    echo $name
+    tmux new -d -s "$name"
+    tmux attach -t "$name"
+}
+
+toggleGlobalProtectConnection() {
+    osascript <<EOF
+        tell application "System Events" to tell process "GlobalProtect"
+            click menu bar item 1 of menu bar 2 -- Activates the GlobalProtect "window" in the menubar
+            set frontmost to true -- keep window 1 active
+            # log count button of window 1
+            # click button 1 of window 1
+            # log count button of window 1
+            # log count pop up button of window 1
+            tell window 1
+                -- Click on the connect or disconnect button, depending on if they exist or not
+                if exists (first UI element whose title is "Connect") then
+                    tell (first UI element whose title is "Connect") to if exists then click
+                else
+                    tell (first UI element whose title is "Disconnect") to if exists then click
+                end if
+            end tell
+            click menu bar item 1 of menu bar 2 -- This will close the GlobalProtect "window" after clicking Connect/Disconnect. This is optional.
+        end tell
+EOF
+}
+
+function switchDefaultEditor() {
+    export EDITOR="code --wait"
+}

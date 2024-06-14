@@ -108,6 +108,8 @@ alias awsume="source awsume"
 #Auto-Complete function for AWSume
 fpath=(~/.awsume/zsh-autocomplete/ $fpath)
 
+alias mux=tmuxinator
+
 export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
 export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
 export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
