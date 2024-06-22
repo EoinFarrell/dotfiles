@@ -87,14 +87,20 @@ compdef kubecolor=kubectl
 . "$HOME/.asdf/asdf.sh"
 # append completions to fpath
 fpath=(${ASDF_DIR}/completions $fpath)
-# initialise completions with ZSH's compinit
-# autoload -Uz compinit && compinit
-. ~/.asdf/plugins/java/set-java-home.zsh
+
+# JAVA
+if [ -f ~/.asdf/plugins/java/set-java-home.zsh ]; then
+    . ~/.asdf/plugins/java/set-java-home.zsh
+fi
 
 # GO Setup
-. ~/.asdf/plugins/golang/set-env.zsh
-alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
-go-reshim
+
+if [ -f . ~/.asdf/plugins/golang/set-env.zsh ]; then
+  . ~/.asdf/plugins/golang/set-env.zsh
+  alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
+  go-reshim
+fi
+
 # . /usr/local/opt/asdf/asdf.sh
 
 # export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
