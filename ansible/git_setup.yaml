@@ -39,6 +39,7 @@
       - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
       - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
       - { src: '~/Code/personal/dotfiles/superfile/hotkeys.toml' , dest: '~/.config/superfile/hotkeys.toml'}
+      - { src: '~/Code/personal/dotfiles/tmuxinator/envSwitch.yml' , dest: '~/.config/tmuxinator/envSwitch.yml'}
   - name: Find all custom zsh files
     find:
       paths: ~/Code/personal/dotfiles/zsh/oh-my-zsh
