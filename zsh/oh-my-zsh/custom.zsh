@@ -95,10 +95,14 @@ fi
 
 # GO Setup
 
-if [ -f . ~/.asdf/plugins/golang/set-env.zsh ]; then
+if [ -f ~/.asdf/plugins/golang/set-env.zsh ]; then
   . ~/.asdf/plugins/golang/set-env.zsh
   alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
-  go-reshim
+  
+  # go-reshim
+  # TODO: https://unix.stackexchange.com/a/1498
+  # Better as function...meh
+  asdf reshim golang && export GOROOT="$(asdf where golang)/go/"
 fi
 
 # . /usr/local/opt/asdf/asdf.sh
