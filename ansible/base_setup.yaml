@@ -27,6 +27,7 @@
       # - http-toolkit
       - iterm2
       - jetbrains-toolbox
+      - jordanbaird-ice
       - kdiff3
       - maccy
       - postman
@@ -35,6 +36,7 @@
       - spotify
       - tigervnc-viewer
       - visual-studio-code
+      - vlc
       # - zoom
   - name: Remove Packages
     community.general.homebrew:
@@ -53,6 +55,7 @@
       - coreutils
      # - derailed/k9s/k9s
       - docker-compose
+      - doggo
       - gh
       - git
       - guile
@@ -77,6 +80,7 @@
       - tig
       - tealdeer #tldr in rust
       - tmux
+      - tmuxinator
       - tree
       - watch
       - wget2
