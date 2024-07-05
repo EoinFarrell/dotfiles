@@ -120,6 +120,10 @@ fpath=(~/.awsume/zsh-autocomplete/ $fpath)
 
 alias mux=tmuxinator
 
+# GIT
+
+alias git-destage="git restore --stage"
+
 export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
 export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
 export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
