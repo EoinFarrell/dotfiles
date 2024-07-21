@@ -81,6 +81,7 @@ plugins=(
     kubectl
     macos
     git-open
+    tmuxinator
     zsh-autocomplete
     zsh-autosuggestions
     zsh-syntax-highlighting
@@ -88,6 +89,8 @@ plugins=(
 
 # Autocomplete for brew
 FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+
+zstyle ':omz:plugins:git' aliases no
 
 source $ZSH/oh-my-zsh.sh
 
@@ -126,4 +129,3 @@ export DOCKER_FOR_MAC_ENABLED=true
 # [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
