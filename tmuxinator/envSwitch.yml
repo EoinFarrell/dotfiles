@@ -57,14 +57,20 @@ windows:
       # synchronize: after
       panes:
         - main:
+          - tmux resize-pane -D 23
           - >-
             echo '\n Environment:' &&
             echo '<%= @args[0] %>' &&
-            echo '\n ArgoCD' &&
+            echo '\n ArgoCD:' &&
             echo 'https://localhost:8080/' &&
-            argopwd &&
-            echo '\n \n Grafana' &&
-            echo 'https://localhost:3000/' &&
+            echo 'Username: admin' &&
+            echo 'Password: `$ argopwd`' &&
+            echo '\n Grafana:' &&
+            echo 'http://localhost:3000/login' &&
+            echo 'Username: admin' &&
+            echo 'Password: `$ grafanapwd`'
+          # - tmux split-window envExports <%= @args[0] %> && k9s
+          - tmux split-window k9s
         - argo:
           - kubectl -n argocd port-forward svc/argocd-server 8080:443
         - grafana:
