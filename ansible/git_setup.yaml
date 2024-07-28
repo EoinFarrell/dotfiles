@@ -40,6 +40,7 @@
       - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
       - { src: '~/Code/personal/dotfiles/superfile/hotkeys.toml' , dest: '~/.config/superfile/hotkeys.toml'}
       - { src: '~/Code/personal/dotfiles/tmuxinator/envSwitch.yml' , dest: '~/.config/tmuxinator/envSwitch.yml'}
+      - { src: '~/Code/personal/dotfiles/ansible/ansible.cfg' , dest: '~/.ansible.cfg'}
   - name: Find all custom zsh files
     find:
       paths: ~/Code/personal/dotfiles/zsh/oh-my-zsh
