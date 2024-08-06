@@ -1,0 +1,66 @@
+---
+# ansible-playbook -i inventory.ini nvidia_setup.yaml -Kk
+- name: "Nvidia Setup"
+  hosts: nr200p
+  become: true
+  tasks:
+    - name: somerepo | apt source
+      ansible.builtin.apt_repository:
+        repo: "deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware"
+        state: present
+    
+    # - name: somerepo | no apt key
+    #   ansible.builtin.get_url:
+    #     url: http://repo.steampowered.com/steam/archive/stable/steam.gpg
+    #     dest: /etc/apt/keyrings/steam.asc
+    #     # checksum: sha256:bb42f0db45d46bab5f9ec619e1a47360b94c27142e57aa71f7050d08672309e0
+    # - name: somerepo | apt source
+    #   ansible.builtin.apt_repository:
+    #     repo: "deb [arch=amd64,i386 signed-by=/etc/apt/keyrings/steam.asc] http://repo.steampowered.com/steam/ stable steam"
+    #     state: present
+
+
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+    - name: Install base packages
+      apt:
+        pkg:
+          - nvidia-driver
+          - firmware-misc-nonfree
+        state: latest
+        update_cache: true
+    - name: Add arch
+      command: dpkg --add-architecture i386
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+    - name: Install base packages
+      apt:
+        pkg:
+          - steam-installer
+          - mesa-vulkan-drivers
+          - mesa-vulkan-drivers:i386
+          - libglx-mesa0:i386
+          - libglx-mesa0:amd64
+          - libgl1-mesa-dri:amd64
+          - libgl1-mesa-dri:i386
+          - libgl1-mesa-glx:amd64
+          - libgl1-mesa-glx:i386
+          # - steam-launcher
+
+    - name: Check if a reboot is required.
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+        get_checksum: no
+      register: reboot_required_file
+    - name: Reboot the server (if required).
+      ansible.builtin.reboot:
+      when: reboot_required_file.stat.exists == true
+    - name: Remove dependencies that are no longer required.
+      ansible.builtin.apt:
+        autoremove: yes

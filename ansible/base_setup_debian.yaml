@@ -1,0 +1,115 @@
+---
+# ansible-playbook -i inventory.ini base_setup_debian.yaml
+- name: "Base Setup Debian"
+  hosts: nr200p
+  become: true
+  tasks:
+    - name: Install aptitude
+      apt:
+        name: aptitude
+        state: latest
+        update_cache: true
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+    - name: Install base packages
+      apt:
+        pkg:
+          - curl
+          - ca-certificates
+          - git
+          - hstr
+          - jq
+          - lsd
+          - rsync
+          - tig
+          - wget2
+          - nfs-common
+          - openssh-server
+        state: latest
+        update_cache: true
+    # - name: Install Tailscale
+    #   command: sudo curl -fsSL https://tailscale.com/install.sh | sh
+
+    - name: Install base packages
+      apt:
+        pkg:
+          - apt-transport-https 
+          - ca-certificates 
+          - curl
+          - software-properties-common
+    - name: "Setup Docker keyring"
+      command: install -m 0755 -d /etc/apt/keyrings
+
+    - name: somerepo | no apt key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        # checksum: sha256:bb42f0db45d46bab5f9ec619e1a47360b94c27142e57aa71f7050d08672309e0
+
+    - name: somerepo | apt source
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian/ {{ ansible_distribution_release }} stable"
+        state: present
+
+    
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+    - name: Install base packages
+      apt:
+        pkg:
+          - gnupg-agent
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+    - name: Ensure group "docker" exists
+      ansible.builtin.group:
+        name: docker
+        state: present
+    - name: Add current user to docker group
+      command: sudo usermod -aG docker $USER
+    - name: Add feoin to docker group
+      command: sudo usermod -aG docker feoin
+        
+    - name: "Create NFS Directories"
+      file:
+        path: "/mnt/unraid-nfs-ansible"
+        state: directory
+    - name: "Create NFS Directories"
+      file:
+        path: "/mnt/unraid-nfs-ansible{{ item }}"
+        state: directory
+      loop:
+        - /Docker-Volumes
+        - /Media
+        - /Temp
+    - name: "mount options for Docker-Volumes Mount"
+      ansible.posix.mount:
+        path: "/mnt/unraid-nfs-ansible{{ item }}"
+        src: "192.168.0.225:/mnt/user{{ item }}"
+        fstype: "nfs"
+        opts: "nfsvers=3,nolock,soft,rw"
+        state: mounted
+      loop:
+        - /Docker-Volumes
+        - /Media
+        - /Temp
+
+    - name: Check if a reboot is required.
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+        get_checksum: no
+      register: reboot_required_file
+    - name: Reboot the server (if required).
+      ansible.builtin.reboot:
+      when: reboot_required_file.stat.exists == true
+    - name: Remove dependencies that are no longer required.
+      ansible.builtin.apt:
+        autoremove: yes
