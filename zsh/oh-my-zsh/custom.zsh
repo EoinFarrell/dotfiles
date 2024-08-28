@@ -80,6 +80,7 @@ source <(kubectl completion zsh)
 alias kubectl=kubecolor
 # make completion work with kubecolor
 compdef kubecolor=kubectl
+updateKubeConfig
 
 
 # ASDF
@@ -133,4 +134,6 @@ export PATH=${PATH/\/Users\/eoinfarrell\/Library\/Application Support\/JetBrains
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/local\/bin:}
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/bin:}
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/appleinternal\/bin:}
+
+source ~/Code/personal/dotfiles/zsh/oh-my-zsh/workday.zsh
 
