@@ -88,7 +88,16 @@ plugins=(
 )
 
 # Autocomplete for brew
-FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+if type brew &>/dev/null; then
+    chmod go-w "$(brew --prefix)/share"
+    chmod -R go-w "$(brew --prefix)/share/zsh"
+
+    FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
+    FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+
+    autoload -Uz compinit
+    compinit
+fi
 
 zstyle ':omz:plugins:git' aliases no
 
