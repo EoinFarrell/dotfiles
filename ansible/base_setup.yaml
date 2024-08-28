@@ -51,6 +51,7 @@
     loop:
       - ansible
       - awscli
+      - bat
       - colima
       - coreutils
      # - derailed/k9s/k9s
@@ -68,6 +69,8 @@
       - kubectl
       - kubectx
       - kubecolor
+      - lazydocker
+      - lazygit
       - lsd
       - mailhog
       - mdcat
@@ -131,3 +134,5 @@
       src: "{{ item.path }}"
       dest: "/Library/Fonts/{{ item.path | basename }}"
     with_items: "{{ findFonts.files }}"
+  - name: Install Rosetta
+    command: softwareupdate --install-rosetta --agree-to-license
