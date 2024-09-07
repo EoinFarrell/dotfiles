@@ -162,3 +162,19 @@ EOF
 function switchDefaultEditor() {
     export EDITOR="code --wait"
 }
+
+function tmuxPercent(){
+    height="$(tmux list-windows -F "#{window_height}" | head -n1)"
+    echo $height
+    newHeight=$(echo "$height/100*$1" | bc -l | xargs printf %.0f)
+    echo $newHeight
+    tmux resize-pane -y $newHeight
+}
+
+function tmuxUp(){
+    tmux resize-pane -D $1
+}
+
+function tmuxDown(){
+    tmux resize-pane -D $1
+}

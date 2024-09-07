@@ -57,7 +57,7 @@ windows:
       # synchronize: after
       panes:
         - main:
-          - tmux resize-pane -D 23
+          - tmuxPercent 85
           - >-
             echo '\n Environment:' &&
             echo '<%= @args[0] %>' &&
@@ -70,12 +70,20 @@ windows:
             echo 'Username: admin' &&
             echo 'Password: `$ grafanapwd`'
           # - tmux split-window envExports <%= @args[0] %> && k9s
+          - sleep 5
+          - updateKubeConfig
           - tmux split-window k9s
         - argo:
+          - sleep 5
+          - updateKubeConfig
           - kubectl -n argocd port-forward svc/argocd-server 8080:443
         - grafana:
+          - sleep 5
+          - updateKubeConfig
           - kubectl -n monitoring port-forward svc/watchdog-grafana 3000:80
         - sshuttle:
-          - runSshuttle <%= @args[0] %>
+          - sleep 5
+          - updateKubeConfig
+          - runTunnel <%= @args[0] %>
   # - server: bundle exec rails s
   # - logs: tail -f log/development.log
