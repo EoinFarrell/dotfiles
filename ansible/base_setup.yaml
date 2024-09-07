@@ -91,14 +91,18 @@
       - zsh
   - name: Tap Homebrew repositorys
     community.general.homebrew_tap:
-      name: localsend/localsend
+      name: "{{ item }}"
       state: present
+    loop:
+      - localsend/localsend
+      # - sachaos/todoist
   - name: Install Tap Packages
     community.general.homebrew:
       name: "{{ item }}"
       state: latest
     loop:
       - localsend
+      # - todoist
   - name: Setup asdf vm dirs
     ansible.builtin.file:
       path: ~/.asdf
