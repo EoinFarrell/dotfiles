@@ -58,6 +58,10 @@ windows:
       panes:
         - main:
           - tmuxPercent 85
+          - sleep 5
+          - updateKubeConfig
+          - tmux split-window k9s
+          # - tmux split-window envExports <%= @args[0] %> && k9s
           - >-
             echo '\n Environment:' &&
             echo '<%= @args[0] %>' &&
@@ -69,10 +73,6 @@ windows:
             echo 'http://localhost:3000/login' &&
             echo 'Username: admin' &&
             echo 'Password: `$ grafanapwd`'
-          # - tmux split-window envExports <%= @args[0] %> && k9s
-          - sleep 5
-          - updateKubeConfig
-          - tmux split-window k9s
         - argo:
           - sleep 5
           - updateKubeConfig
