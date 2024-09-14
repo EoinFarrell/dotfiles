@@ -60,6 +60,7 @@ windows:
           - tmuxPercent 85
           - sleep 5
           - updateKubeConfig
+          - sso-cli aws console
           - tmux split-window k9s
           # - tmux split-window envExports <%= @args[0] %> && k9s
           - >-
