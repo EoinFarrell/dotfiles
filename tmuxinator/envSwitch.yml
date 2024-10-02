@@ -60,7 +60,7 @@ windows:
           - tmuxPercent 85
           - sleep 5
           - updateKubeConfig
-          - envStartup <%= @args[0] %>
+          - envDependantStartup <%= @args[0] %>
           - tmux split-window k9s
           # - tmux split-window envExports <%= @args[0] %> && k9s
           - printAccessInfo
@@ -76,5 +76,3 @@ windows:
           - sleep 5
           - updateKubeConfig
           - runTunnel <%= @args[0] %>
-  # - server: bundle exec rails s
-  # - logs: tail -f log/development.log
