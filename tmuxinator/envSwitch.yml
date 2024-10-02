@@ -60,7 +60,7 @@ windows:
           - tmuxPercent 85
           - sleep 5
           - updateKubeConfig
-          - envStart <%= @args[0] %>
+          - envStartup <%= @args[0] %>
           - tmux split-window k9s
           # - tmux split-window envExports <%= @args[0] %> && k9s
           - printAccessInfo
