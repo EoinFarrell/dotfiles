@@ -60,20 +60,10 @@ windows:
           - tmuxPercent 85
           - sleep 5
           - updateKubeConfig
-          - sso-cli aws console
+          - envStart <%= @args[0] %>
           - tmux split-window k9s
           # - tmux split-window envExports <%= @args[0] %> && k9s
-          - >-
-            echo '\n Environment:' &&
-            echo '<%= @args[0] %>' &&
-            echo '\n ArgoCD:' &&
-            echo 'https://localhost:8080/' &&
-            echo 'Username: admin' &&
-            echo 'Password: `$ argopwd`' &&
-            echo '\n Grafana:' &&
-            echo 'http://localhost:3000/login' &&
-            echo 'Username: admin' &&
-            echo 'Password: `$ grafanapwd`'
+          - printAccessInfo
         - argo:
           - sleep 5
           - updateKubeConfig
