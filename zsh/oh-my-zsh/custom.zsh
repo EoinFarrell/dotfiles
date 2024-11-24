@@ -62,6 +62,18 @@ source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/
 # test -d "${GOPATH}" || mkdir "${GOPATH}"
 # test -d "${GOPATH}/src/github.com" || mkdir -p "${GOPATH}/src/github.com"
 
+# GO Setup
+
+if [ -f ~/.asdf/plugins/golang/set-env.zsh ]; then
+  . ~/.asdf/plugins/golang/set-env.zsh
+  alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
+  
+  # go-reshim
+  # TODO: https://unix.stackexchange.com/a/1498
+  # Better as function...meh
+  asdf reshim golang && export GOROOT="$(asdf where golang)/go/"
+fi
+
 # Google Cloud Builder Sdk
 # The next line updates PATH for the Google Cloud SDK.
 # source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
@@ -94,18 +106,6 @@ if [ -f ~/.asdf/plugins/java/set-java-home.zsh ]; then
     . ~/.asdf/plugins/java/set-java-home.zsh
 fi
 
-# GO Setup
-
-if [ -f ~/.asdf/plugins/golang/set-env.zsh ]; then
-  . ~/.asdf/plugins/golang/set-env.zsh
-  alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
-  
-  # go-reshim
-  # TODO: https://unix.stackexchange.com/a/1498
-  # Better as function...meh
-  asdf reshim golang && export GOROOT="$(asdf where golang)/go/"
-fi
-
 # . /usr/local/opt/asdf/asdf.sh
 
 # export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
@@ -135,5 +135,10 @@ export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootst
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/bin:}
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/appleinternal\/bin:}
 
-source ~/Code/personal/dotfiles/zsh/oh-my-zsh/workday.zsh
+func_result="$(isItermSession)"
 
+if [ $func_result  -eq 1 ]; then
+  getLatestPackages
+else
+  echo 'Tmux session - Latest from Github not pulled'
+fi

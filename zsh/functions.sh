@@ -1,5 +1,41 @@
 #!/bin/bash
 
+alias runGoScript="(cd $DOTFILES/go-scripts; go run ./script.go)"
+
+getLatestPackages() {
+    # docker system prune -f --volumes
+    brew outdated --json | runGoScript | xargs brew upgrade
+    brew outdated
+
+    PLUGINSD=$ZSH_CUSTOM/plugins
+
+    DIRECTORY=$PLUGINSD/git-open
+    getLatestFromGit $DIRECTORY "https://github.com/paulirish/git-open.git"
+
+    DIRECTORY=$PLUGINSD/zsh-autosuggestions
+    getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-autosuggestions"
+
+    DIRECTORY=$PLUGINSD/zsh-syntax-highlighting
+    getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-syntax-highlighting"
+
+    DIRECTORY=$PLUGINSD/zsh-autocomplete
+    getLatestFromGit $DIRECTORY https://github.com/marlonrichert/zsh-autocomplete.git
+    # source $DIRECTORY/zsh-autocomplete.plugin.zsh
+
+    DIRECTORY=$PLUGINSD/zsh-completions
+    getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-completions"
+    fpath+=$DIRECTORY/src
+
+    THEMESD=$HOME/.oh-my-zsh/custom/themes
+    DIRECTORY=$THEMESD/powerlevel10k
+    getLatestFromGit $DIRECTORY "https://github.com/romkatv/powerlevel10k.git"
+
+    $HOME/.asdf/bin/asdf update &
+    tldr --update &
+
+    # python3 -m pip install --upgrade pip &
+}
+
 isInternetAvailable() {
     ping -q -c1 google.com &>/dev/null
     if [ $? -eq 0 ]; then
@@ -60,7 +96,11 @@ updateKubeConfig(){
     mkdir -p "${ADD_KUBECONFIG_FILES}"
     OIFS="$IFS"
     IFS=$'\n'
-    for kubeconfigFile in `find "${ADD_KUBECONFIG_FILES}" -type f #-name "*.yml" -o -name "*.yaml"`
+    for kubeconfigFile in `find "${ADD_KUBECONFIG_FILES}" -type f -maxdepth 1` #-name "*.yml" -o -name "*.yaml"`
+    do
+        export KUBECONFIG="$kubeconfigFile:$KUBECONFIG"
+    done
+    for kubeconfigFile in `find "${ADD_KUBECONFIG_FILES}" -type f -maxdepth 2 -name "kubeconfig"`
     do
         export KUBECONFIG="$kubeconfigFile:$KUBECONFIG"
     done
@@ -85,23 +125,23 @@ weather() {
     fi
 }   
 
-todo(){
-    source $DOTFILES/zsh/scripts/todo.sh $1 todo $2 $3 $4
+# todo(){
+#     source $DOTFILES/zsh/scripts/todo.sh $1 todo $2 $3 $4
 
-    # if ! [ -z "$1" ]; then
-    #     echo "- ${1}" >> $NOTES/TODO.md
-    # else
-    #     mdcat $NOTES/TODO.md
-    # fi
-}
+#     # if ! [ -z "$1" ]; then
+#     #     echo "- ${1}" >> $NOTES/TODO.md
+#     # else
+#     #     mdcat $NOTES/TODO.md
+#     # fi
+# }
 
-todo-demo(){
-    source $DOTFILES/zsh/scripts/todo.sh $1 demo $2
-}
+# todoDemo(){
+#     source $DOTFILES/zsh/scripts/todo.sh $1 demo $2
+# }
 
-cp-consts() {
-    source $DOTFILES/zsh/scripts/copy/copy.sh $1 $2 $3
-}
+# cpConsts() {
+#     source $DOTFILES/zsh/scripts/copy/copy.sh $1 $2 $3
+# }
 
 codec(){
     cd $1 && code .
@@ -168,7 +208,7 @@ function tmuxPercent(){
     echo $height
     newHeight=$(echo "$height/100*$1" | bc -l | xargs printf %.0f)
     echo $newHeight
-    tmux resize-pane -y $newHeight
+    tmux resize-pane -y $newHeight -t $2
 }
 
 function tmuxUp(){
@@ -177,4 +217,10 @@ function tmuxUp(){
 
 function tmuxDown(){
     tmux resize-pane -D $1
+}
+
+function sourceEnvFile(){
+    set -a # automatically export all variables
+    source .env
+    set +a
 }
