@@ -4,8 +4,6 @@ alias runGoScript="(cd $DOTFILES/go-scripts; go run ./script.go)"
 
 getLatestPackages() {
     # docker system prune -f --volumes
-    brew outdated --json | runGoScript | xargs brew upgrade
-    brew outdated
 
     PLUGINSD=$ZSH_CUSTOM/plugins
 
@@ -32,8 +30,15 @@ getLatestPackages() {
 
     $HOME/.asdf/bin/asdf update &
     tldr --update &
+    gem update tmuxinator &
 
     # python3 -m pip install --upgrade pip &
+
+    brew outdated --json | runGoScript | xargs brew upgrade
+    
+    echo "----Brew Outdated----"
+    brew outdated
+    echo "---------------------"
 }
 
 isInternetAvailable() {
@@ -66,10 +71,16 @@ getLatestFromGit() {
     func_result="$(isInternetAvailable)"
     if [ $func_result -eq 1 ]; then
         if [ ! -d "$1" ]; then
+            echo "-------GIT Clone------"
+            echo $2
             git clone --depth 1 $2 $1
         else
+            echo "-------GIT Pull-------"
+            echo $2
             git -C $1 pull
         fi
+
+        echo "----------------------"
     fi
 }
 
@@ -223,4 +234,12 @@ function sourceEnvFile(){
     set -a # automatically export all variables
     source .env
     set +a
+}
+
+function finder {
+  if (( ! $# )); then
+    open_command $PWD
+  else
+    open_command $@
+  fi
 }
