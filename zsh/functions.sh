@@ -5,6 +5,10 @@ alias runGoScript="(cd $DOTFILES/go-scripts; go run ./script.go)"
 getLatestPackages() {
     # docker system prune -f --volumes
 
+    $HOME/.asdf/bin/asdf update &
+    tldr --update &
+    gem update tmuxinator &
+
     PLUGINSD=$ZSH_CUSTOM/plugins
 
     DIRECTORY=$PLUGINSD/git-open
@@ -28,10 +32,6 @@ getLatestPackages() {
     DIRECTORY=$THEMESD/powerlevel10k
     getLatestFromGit $DIRECTORY "https://github.com/romkatv/powerlevel10k.git"
 
-    $HOME/.asdf/bin/asdf update &
-    tldr --update &
-    gem update tmuxinator &
-
     # python3 -m pip install --upgrade pip &
 
     brew outdated --json | runGoScript | xargs brew upgrade
@@ -39,6 +39,8 @@ getLatestPackages() {
     echo "----Brew Outdated----"
     brew outdated
     echo "---------------------"
+
+    wait
 }
 
 isInternetAvailable() {
