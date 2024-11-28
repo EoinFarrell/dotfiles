@@ -46,6 +46,10 @@ export HSTR_CONFIG=hicolor        # get more colors
 
 export TERM="xterm-256color"
 
+# case insensitive completion
+# https://stackoverflow.com/a/24237590
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+
 source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/
 
 # eval "$(rbenv init -)"
@@ -124,6 +128,7 @@ alias mux=tmuxinator
 # GIT
 
 alias git-destage="git restore --stage"
+alias git-clean="git-destage && git restore . && git clean -fd"
 
 export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
 export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
