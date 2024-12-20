@@ -16,7 +16,7 @@
   - name: Install Casks
     community.general.homebrew:
       name: "homebrew/cask/{{ item }}"
-      state: latest
+      state: present
     loop:
       - devtoys
       - disk-inventory-x
@@ -47,7 +47,7 @@
   - name: Install Packages
     community.general.homebrew:
       name: "{{ item }}"
-      state: latest
+      state: present
     loop:
       - ansible
       - awscli
@@ -99,7 +99,7 @@
   - name: Install Tap Packages
     community.general.homebrew:
       name: "{{ item }}"
-      state: latest
+      state: present
     loop:
       - localsend
       # - todoist

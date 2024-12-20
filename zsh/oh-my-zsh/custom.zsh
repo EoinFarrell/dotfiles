@@ -96,7 +96,7 @@ source <(kubectl completion zsh)
 alias kubectl=kubecolor
 # make completion work with kubecolor
 compdef kubecolor=kubectl
-updateKubeConfig
+# updateKubeConfig
 
 
 # ASDF
@@ -127,7 +127,7 @@ alias mux=tmuxinator
 
 # GIT
 
-alias git-destage="git restore --stage"
+alias git-destage="git restore --staged ."
 alias git-clean="git-destage && git restore . && git clean -fd"
 
 export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
@@ -147,3 +147,8 @@ if [ $func_result  -eq 1 ]; then
 else
   echo 'Tmux session - Latest from Github not pulled'
 fi
+
+## KubeSwitch
+source <(switcher init zsh)
+source <(switch completion zsh)
+alias kubectx='switch'

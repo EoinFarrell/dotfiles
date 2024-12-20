@@ -39,8 +39,8 @@
       - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
       - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
       - { src: '~/Code/personal/dotfiles/superfile/hotkeys.toml' , dest: '~/.config/superfile/hotkeys.toml'}
-      - { src: '~/Code/personal/dotfiles/tmuxinator/envSwitch.yml' , dest: '~/.config/tmuxinator/envSwitch.yml'}
       - { src: '~/Code/personal/dotfiles/ansible/ansible.cfg' , dest: '~/.ansible.cfg'}
+      # - { src: '~/Code/personal/dotfiles/kubeswitch/switch-config.yaml' , dest: '~/.kube/switch-config.yaml'}
   - name: Find all custom zsh files
     find:
       paths: ~/Code/personal/dotfiles/zsh/oh-my-zsh
@@ -51,3 +51,13 @@
       path: "~/.oh-my-zsh/custom/{{ item.path | basename }}"
       state: link
     with_items: "{{ find.files }}"
+  - name: Find all custom Tmuxinator files
+    find:
+      paths: ~/Code/personal/dotfiles/tmuxinator
+    register: findTmuxinator
+  - name: ~/.config/tmuxinator
+    file:
+      src: "{{ item.path }}"
+      path: "~/.config/tmuxinator/{{ item.path | basename }}"
+      state: link
+    with_items: "{{ findTmuxinator.files }}"

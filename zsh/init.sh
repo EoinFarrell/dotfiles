@@ -1,6 +1,9 @@
 CODE=~/Code
 PERSONAL=~/Code/personal
 DOTFILES=~/Code/personal/dotfiles
+DOTFILES_WD=~/Code/workday/eoin-farrell/dotfiles
+WDDOTFILES=$DOTFILES_WD
+WdDOTFILESD=$DOTFILES_WD
 NOTES=~/Code/personal/notes.eoinfarrell.dev
 HOMELAB=~/Code/personal/homelab.eoinfarrell.dev
 AWS_CONFIG=~/.aws
@@ -8,7 +11,7 @@ KUBE_CONFIG=~/.kube
 SSH_CONFIG=~/.ssh
 
 source $DOTFILES/zsh/functions.sh
-source $DOTFILES/zsh/workday-functions.sh
+source $DOTFILES_WD/zsh/workday-functions.sh
 
 # exec tmux
 # tmux new-session -d -s htop-session 'htop';  # start new detached tmux session, run htop

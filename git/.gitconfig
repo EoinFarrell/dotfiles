@@ -38,4 +38,4 @@
 
 # Workday
 [includeIf "gitdir:~/Code/workday/"]
-  path = ~/Code/personal/dotfiles/git/.gitconfig-workday
+  path = ~/Code/workday/eoin-farrell/dotfiles/git/.gitconfig-workday
