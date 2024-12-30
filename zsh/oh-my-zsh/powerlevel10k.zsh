@@ -1,10 +1,10 @@
-function prompt_my_devbox() {
-    if [[ -z "${DEVBOX_SHELL_ENABLED}" ]]; then
-        return
-    else
-        p10k segment -i '</>' -f blue
-    fi
-}
+# function prompt_my_devbox() {
+#     if [[ -z "${DEVBOX_SHELL_ENABLED}" ]]; then
+#         return
+#     else
+#         p10k segment -i '</>' -f blue
+#     fi
+# }
 
 source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme
 
@@ -32,7 +32,7 @@ POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
 POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='red'
 
-POWERLEVEL9K_DIR_PACKAGE_FILES=(devbox.json)
+# POWERLEVEL9K_DIR_PACKAGE_FILES=(devbox.json)
 POWERLEVEL9K_SHORTEN_STRATEGY=truncate_with_package_name
 POWERLEVEL9K_DIR_TRUNCATE_BEFORE_MARKER=false
 # Don't shorten this many last directory segments. They are anchors.

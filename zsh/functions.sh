@@ -192,31 +192,31 @@ tm(){
     tmux attach -t "$name"
 }
 
-toggleGlobalProtectConnection() {
-    osascript <<EOF
-        tell application "System Events" to tell process "GlobalProtect"
-            click menu bar item 1 of menu bar 2 -- Activates the GlobalProtect "window" in the menubar
-            set frontmost to true -- keep window 1 active
-            # log count button of window 1
-            # click button 1 of window 1
-            # log count button of window 1
-            # log count pop up button of window 1
-            tell window 1
-                -- Click on the connect or disconnect button, depending on if they exist or not
-                if exists (first UI element whose title is "Connect") then
-                    tell (first UI element whose title is "Connect") to if exists then click
-                else
-                    tell (first UI element whose title is "Disconnect") to if exists then click
-                end if
-            end tell
-            click menu bar item 1 of menu bar 2 -- This will close the GlobalProtect "window" after clicking Connect/Disconnect. This is optional.
-        end tell
-EOF
-}
+# toggleGlobalProtectConnection() {
+#     osascript <<EOF
+#         tell application "System Events" to tell process "GlobalProtect"
+#             click menu bar item 1 of menu bar 2 -- Activates the GlobalProtect "window" in the menubar
+#             set frontmost to true -- keep window 1 active
+#             # log count button of window 1
+#             # click button 1 of window 1
+#             # log count button of window 1
+#             # log count pop up button of window 1
+#             tell window 1
+#                 -- Click on the connect or disconnect button, depending on if they exist or not
+#                 if exists (first UI element whose title is "Connect") then
+#                     tell (first UI element whose title is "Connect") to if exists then click
+#                 else
+#                     tell (first UI element whose title is "Disconnect") to if exists then click
+#                 end if
+#             end tell
+#             click menu bar item 1 of menu bar 2 -- This will close the GlobalProtect "window" after clicking Connect/Disconnect. This is optional.
+#         end tell
+# EOF
+# }
 
-function switchDefaultEditor() {
-    export EDITOR="code --wait"
-}
+# function switchDefaultEditor() {
+#     export EDITOR="code --wait"
+# }
 
 function tmuxPercent(){
     height="$(tmux list-windows -F "#{window_height}" | head -n1)"

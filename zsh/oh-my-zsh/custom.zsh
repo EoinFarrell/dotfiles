@@ -38,17 +38,7 @@ export HISTFILE=~/.zsh_history  # ensure history file visibility
 export HSTR_CONFIG=hicolor        # get more colors
 #bindkey -s "\C-r" "\eqhstr\n"     # bind hstr to Ctrl-r (for Vi mode check doc)
 
-# Colorise the top Tabs of Iterm2 with the same color as background
-# Just change the 18/26/33 wich are the rgb values
-# echo -e "\033]6;1;bg;red;brightness;18\a"
-# echo -e "\033]6;1;bg;green;brightness;26\a"
-# echo -e "\033]6;1;bg;blue;brightness;33\a"
-
 export TERM="xterm-256color"
-
-# case insensitive completion
-# https://stackoverflow.com/a/24237590
-zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
 source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/
 
