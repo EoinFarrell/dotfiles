@@ -1,14 +1,15 @@
-# Autocomplete for brew
-if type brew &>/dev/null; then
-    chmod go-w "$(brew --prefix)/share"
-    chmod -R go-w "$(brew --prefix)/share/zsh"
+## TODO Replace with default: https://github.com/zsh-users/zsh-completions
+# # Autocomplete for brew
+# if type brew &>/dev/null; then
+#     chmod go-w "$(brew --prefix)/share"
+#     chmod -R go-w "$(brew --prefix)/share/zsh"
 
-    FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
-    FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+#     FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
+#     FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
 
-    autoload -Uz compinit
-    compinit
-fi
+#     autoload -Uz compinit
+#     compinit
+# fi
 
 export DOCKER_FOR_MAC_ENABLED=true
 
@@ -106,11 +107,13 @@ fi
 # # Add auto completion for todo.txt
 # complete -F _todo t
 
+## Replace with https://github.com/mkokho/kubemrr
+## Or re-enable kubectl plugin
 # get zsh complete kubectl
-source <(kubectl completion zsh)
-alias kubectl=kubecolor
-# make completion work with kubecolor
-compdef kubecolor=kubectl
+# source <(kubectl completion zsh)
+# alias kubectl=kubecolor
+# # make completion work with kubecolor
+# compdef kubecolor=kubectl
 # updateKubeConfig
 
 
@@ -163,6 +166,7 @@ if [ $func_result  -eq 1 ]; then
 fi
 
 ## KubeSwitch
-source <(switcher init zsh)
-source <(switch completion zsh)
+## TODO Fix this
+# source <(switcher init zsh)
+# source <(switch completion zsh)
 alias kubectx='switch'
