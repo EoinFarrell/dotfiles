@@ -31,7 +31,6 @@
       state: link
     loop:
       - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
-      - { src: '~/Code/personal/dotfiles/zsh/init.sh' , dest: '~/.oh-my-zsh/custom/init.sh'}
       - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
       - { src: '~/Code/personal/dotfiles/git/.gitconfig' , dest: '~/.gitconfig'}
       - { src: '~/Code/personal/dotfiles/tmux/.tmux.conf' , dest: '~/.tmux.conf'}

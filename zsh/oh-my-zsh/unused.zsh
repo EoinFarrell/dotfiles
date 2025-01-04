@@ -78,3 +78,26 @@
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 # [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+
+
+
+# exec tmux
+# tmux new-session -d -s htop-session 'htop';  # start new detached tmux session, run htop
+# tmux split-window;                             # split the detached tmux session
+# tmux send 'htop -t' ENTER;                     # send 2nd command 'htop -t' to 2nd pane. I believe there's a `--target` option to target specific pane.
+# tmux a;                                        # open (attach) tmux session.
+
+# if [ $func_result  -eq 1 ]; then
+
+#   tmux ls && read "?Select a session<default>:" tmux_session && tmux attach -t ${tmux_session:-default} || tmux new -s ${tmux_session:-default}
+  
+  
+# else
+#   SESSION_NAME=$(tmux display-message -p '#S')
+#   if [ "$SESSION_NAME" = "default" ]; then
+#     echo 'Default window'
+#     tmux new-window getLatestPackages
+#   fi
+
+# fi
