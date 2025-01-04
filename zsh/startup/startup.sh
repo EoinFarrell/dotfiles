@@ -1,16 +1,3 @@
-## TODO Replace with default: https://github.com/zsh-users/zsh-completions
-# # Autocomplete for brew
-# if type brew &>/dev/null; then
-#     chmod go-w "$(brew --prefix)/share"
-#     chmod -R go-w "$(brew --prefix)/share/zsh"
-
-#     FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
-#     FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-
-#     autoload -Uz compinit
-#     compinit
-# fi
-
 export DOCKER_FOR_MAC_ENABLED=true
 
 # Allow older ruby versions to run
@@ -107,22 +94,6 @@ fi
 # # Add auto completion for todo.txt
 # complete -F _todo t
 
-## Replace with https://github.com/mkokho/kubemrr
-## Or re-enable kubectl plugin
-# get zsh complete kubectl
-# source <(kubectl completion zsh)
-# alias kubectl=kubecolor
-# # make completion work with kubecolor
-# compdef kubecolor=kubectl
-# updateKubeConfig
-
-
-# ASDF
-
-. "$HOME/.asdf/asdf.sh"
-# append completions to fpath
-fpath=(${ASDF_DIR}/completions $fpath)
-
 # JAVA
 if [ -f ~/.asdf/plugins/java/set-java-home.zsh ]; then
     . ~/.asdf/plugins/java/set-java-home.zsh
@@ -133,13 +104,6 @@ fi
 # export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 export PATH="$HOME/Library/Python/3.9/bin:$PATH"
-
-#AWS
-
-#AWSume alias to source the AWSume script
-alias awsume="source awsume"
-#Auto-Complete function for AWSume
-fpath=(~/.awsume/zsh-autocomplete/ $fpath)
 
 alias mux=tmuxinator
 
@@ -164,9 +128,3 @@ if [ $func_result  -eq 1 ]; then
   getLatestPackages
   test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 fi
-
-## KubeSwitch
-## TODO Fix this
-# source <(switcher init zsh)
-# source <(switch completion zsh)
-alias kubectx='switch'

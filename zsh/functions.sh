@@ -34,6 +34,9 @@ getLatestPackages() {
 
     # python3 -m pip install --upgrade pip &
 
+    kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
+    switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
+
     brew outdated --json | runGoScript | xargs brew upgrade
     
     echo "----Brew Outdated----"

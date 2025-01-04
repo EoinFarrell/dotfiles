@@ -13,7 +13,7 @@ SSH_CONFIG=~/.ssh
 source $DOTFILES/zsh/functions.sh
 
 # loop or direct options
-# for f in $DOTFILES/zsh/startup/*; do echo $f;done
-source $DOTFILES/zsh/startup/startup.sh
+for f in $DOTFILES/zsh/startup/*; do source $f;done
+# source $DOTFILES/zsh/startup/startup.sh
 
 source $DOTFILES_WD/zsh/init.sh
