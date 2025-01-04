@@ -31,5 +31,4 @@ source $DOTFILES_WD/zsh/workday-functions.sh
 #     tmux new-window getLatestPackages
 #   fi
 
-#   echo 'Tmux session - Latest from Github not pulled'
 # fi

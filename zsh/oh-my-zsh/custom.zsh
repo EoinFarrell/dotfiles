@@ -1,7 +1,7 @@
 # Nix
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-  source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-fi
+# if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+#   source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+# fi
 # End Nix
 
 #LSD
@@ -40,8 +40,6 @@ export HSTR_CONFIG=hicolor        # get more colors
 
 export TERM="xterm-256color"
 
-source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/
-
 # eval "$(rbenv init -)"
 
 # export PATH="$HOME/.jenv/bin:$PATH"
@@ -65,7 +63,7 @@ if [ -f ~/.asdf/plugins/golang/set-env.zsh ]; then
   # go-reshim
   # TODO: https://unix.stackexchange.com/a/1498
   # Better as function...meh
-  asdf reshim golang && export GOROOT="$(asdf where golang)/go/"
+  # asdf reshim golang && export GOROOT="$(asdf where golang)/go/"
 fi
 
 # Google Cloud Builder Sdk
@@ -134,8 +132,6 @@ func_result="$(isItermSession)"
 
 if [ $func_result  -eq 1 ]; then
   getLatestPackages
-else
-  echo 'Tmux session - Latest from Github not pulled'
 fi
 
 ## KubeSwitch

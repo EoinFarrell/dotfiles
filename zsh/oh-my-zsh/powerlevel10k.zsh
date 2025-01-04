@@ -6,13 +6,10 @@
 #     fi
 # }
 
-source ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme
-
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-# ZSH_THEME="robbyrussell"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 POWERLEVEL9K_KUBECONTEXT_CLASSES=(
@@ -20,6 +17,8 @@ POWERLEVEL9K_KUBECONTEXT_CLASSES=(
     '*stg*'    stg
     '*'        other
 )
+
+POWERLEVEL9K_TRANSIENT_PROMPT=same-dir
 
 POWERLEVEL9K_KUBECONTEXT_PRD_BACKGROUND=red
 POWERLEVEL9K_KUBECONTEXT_STG_BACKGROUND=yellow
