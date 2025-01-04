@@ -9,15 +9,10 @@
 export PATH=$HOME/bin:/usr/local/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 
+source ~/Code/personal/dotfiles/zsh/init.sh
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
-
-# Uncomment the following line to automatically update without prompting.
-DISABLE_UPDATE_PROMPT="true"
-
-# Would you like to use another custom folder than $ZSH/custom?
-ZSH_CUSTOM=$HOME/.oh-my-zsh/custom
-source $ZSH_CUSTOM/init.sh
 
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
@@ -38,40 +33,4 @@ plugins=(
     zsh-syntax-highlighting
 )
 
-# Autocomplete for brew
-if type brew &>/dev/null; then
-    chmod go-w "$(brew --prefix)/share"
-    chmod -R go-w "$(brew --prefix)/share/zsh"
-
-    FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
-    FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-
-    autoload -Uz compinit
-    compinit
-fi
-
-zstyle ':omz:plugins:git' aliases no
-zstyle ':omz:plugins:docker' aliases no
-zstyle ':omz:plugins:docker-compose' aliases no
-
-# case insensitive completion
-# https://stackoverflow.com/a/24237590
-zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-
 source $ZSH/oh-my-zsh.sh
-
-export DOCKER_FOR_MAC_ENABLED=true
-
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
-
-# Allow older ruby versions to run
-export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
-export RUBY_CFLAGS="-w"
-export LDFLAGS="-L/opt/homebrew/opt/readline/lib:$LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/readline/include:$CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/readline/lib/pkgconfig:$PKG_CONFIG_PATH"
-export optflags="-Wno-error=implicit-function-declaration"
-export LDFLAGS="-L/opt/homebrew/opt/libffi/lib:$LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/libffi/include:$CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
