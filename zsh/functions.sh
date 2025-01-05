@@ -43,7 +43,7 @@ getLatestPackages() {
     brew outdated
     echo "---------------------"
 
-    ansible-playbook $DOTFILES/ansible/git_setup.yaml
+    ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 $DOTFILES/ansible/git_setup.yaml
 
     wait
 }
