@@ -1,6 +1,11 @@
 # Uncomment the following line to automatically update without prompting.
 DISABLE_UPDATE_PROMPT="true"
 
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+DISABLE_UNTRACKED_FILES_DIRTY="true"
+
 zstyle ':omz:plugins:git' aliases no
 zstyle ':omz:plugins:docker' aliases no
 zstyle ':omz:plugins:docker-compose' aliases no
