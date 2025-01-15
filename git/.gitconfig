@@ -39,3 +39,6 @@
 # Workday
 [includeIf "gitdir:~/Code/workday/"]
   path = ~/Code/workday/eoin-farrell/dotfiles/git/.gitconfig-workday
+
+[includeIf "gitdir:~/.asdf/"]
+  path = ~/Code/workday/eoin-farrell/dotfiles/git/.gitconfig-workday
