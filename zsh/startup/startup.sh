@@ -72,7 +72,8 @@ export TERM="xterm-256color"
 # GO Setup
 
 if [ -f ~/.asdf/plugins/golang/set-env.zsh ]; then
-  . ~/.asdf/plugins/golang/set-env.zsh
+  # https://github.com/asdf-community/asdf-golang/issues/141
+  # . ~/.asdf/plugins/golang/set-env.zsh
   alias go-reshim='asdf reshim golang && export GOROOT="$(asdf where golang)/go/"'
   
   # go-reshim
@@ -96,7 +97,8 @@ fi
 
 # JAVA
 if [ -f ~/.asdf/plugins/java/set-java-home.zsh ]; then
-    . ~/.asdf/plugins/java/set-java-home.zsh
+    # https://github.com/halcyon/asdf-java/issues/193
+    # . ~/.asdf/plugins/java/set-java-home.zsh
 fi
 
 # . /usr/local/opt/asdf/asdf.sh
