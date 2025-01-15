@@ -24,6 +24,7 @@
       recurse: yes
     loop:
       - ~/.config/superfile
+      - ~/.config/bat
   - name: Create a symbolic links
     ansible.builtin.file:
       src: "{{ item.src }}"
@@ -38,6 +39,7 @@
       - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
       - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
       - { src: '~/Code/personal/dotfiles/superfile/hotkeys.toml' , dest: '~/.config/superfile/hotkeys.toml'}
+      - { src: '~/Code/personal/dotfiles/bat/config' , dest: '~/.config/bat/config'}
       - { src: '~/Code/personal/dotfiles/ansible/ansible.cfg' , dest: '~/.ansible.cfg'}
       - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/Library/Application Support/com.mitchellh.ghostty/config'}
       # - { src: '~/Code/personal/dotfiles/kubeswitch/switch-config.yaml' , dest: '~/.kube/switch-config.yaml'}
