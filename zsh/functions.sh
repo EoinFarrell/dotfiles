@@ -58,11 +58,8 @@ isInternetAvailable() {
 }
 
 isItermSession() {
-    if [ "$TERM_PROGRAM" != "iTerm.app" ]; then
-        echo "0"
-    else
-        echo "1"
-    fi
+    [ "$TERM_PROGRAM" = "iTerm.app" ]
+    return
 }
 
 

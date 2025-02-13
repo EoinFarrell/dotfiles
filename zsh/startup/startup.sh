@@ -124,9 +124,7 @@ export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootst
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/bin:}
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/appleinternal\/bin:}
 
-func_result="$(isItermSession)"
-
-if [ $func_result  -eq 1 ]; then
+if isItermSession; then
   getLatestPackages
   test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 fi
