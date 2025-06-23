@@ -15,3 +15,6 @@ zstyle ':omz:plugins:docker-compose' aliases no
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 # zstyle ':completion:*' completer _expand _complete _ignored _correct _approximate _prefix
 # setopt menu_complete
+
+zstyle ':autocomplete:*' delay 1  # seconds (float)
+zstyle ':autocomplete:*' min-input 3 # characters (integer)

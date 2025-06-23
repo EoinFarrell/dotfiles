@@ -85,6 +85,7 @@
       - tmux
       - tmuxinator
       - tree
+      - txn2/tap/kubefwd
       - watch
       - wget2
      # - xo/xo/usql
