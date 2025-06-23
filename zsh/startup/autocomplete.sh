@@ -20,6 +20,7 @@ alias kubectx='switch'
 ## Or re-enable kubectl plugin
 # get zsh complete kubectl
 # source <(kubectl completion zsh) # this is now handled by zsh plugin
+export KUBECOLOR_KUBECTL=/opt/homebrew/bin/kubectl
 alias kubectl=kubecolor
 # # make completion work with kubecolor
 compdef kubecolor=kubectl

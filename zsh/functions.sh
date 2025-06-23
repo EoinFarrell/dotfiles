@@ -88,6 +88,10 @@ getLatestFromGit() {
     fi
 }
 
+dockerCleanContainers(){
+    docker ps -q -a | xargs -I id sh -c 'docker stop id && docker rm id' 
+}
+
 # Restart Docker for Mac
 # https://forums.docker.com/t/restart-docker-from-command-line/9420/8
 dockerRestart() {
