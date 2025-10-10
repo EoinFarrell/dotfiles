@@ -36,3 +36,6 @@ plugins=(
 )
 
 source $ZSH/oh-my-zsh.sh
+
+# Added by Windsurf
+export PATH="/Users/eoin.farrell/.codeium/windsurf/bin:$PATH"

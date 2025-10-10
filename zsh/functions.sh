@@ -134,6 +134,15 @@ watchK8Pods() {
     watch -n 5 "kubectl get pods | grep $1"
 }
 
+setupK8Proxy(){
+    kubectl proxy --port $((port + 1)) --api-prefix=/api/v1/namespaces/
+    # open http://localhost:8001/api/v1/namespaces/argocd/services/https:argocd-server:443/proxy/
+}
+
+proxyK8Service(){
+    open http://localhost:$1/api/v1/namespaces/$2/services/https:$3:$4/proxy/
+}
+
 alias docker-restart=$dockerRestart
 
 weather() {
@@ -143,6 +152,14 @@ weather() {
         curl http://v2.wttr.in/dublin
     fi
 }   
+
+testInternet(){
+    watch -n 1 start=$SECONDS
+    echo "Response Code from https://www.google.com"
+    curl -w "%{http_code}" -o /dev/null -s https://www.google.com
+    echo "Seconds:"
+    echo $(( SECONDS - start ))
+}
 
 # todo(){
 #     source $DOTFILES/zsh/scripts/todo.sh $1 todo $2 $3 $4
@@ -250,4 +267,8 @@ function finder {
   else
     open_command $@
   fi
+}
+
+function gitShallowCloneToFull(){
+    git fetch --unshallow
 }
