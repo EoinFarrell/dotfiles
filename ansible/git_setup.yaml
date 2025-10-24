@@ -42,8 +42,10 @@
       - { src: '~/Code/personal/dotfiles/bat/config' , dest: '~/.config/bat/config'}
       - { src: '~/Code/personal/dotfiles/ansible/ansible.cfg' , dest: '~/.ansible.cfg'}
       - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/Library/Application Support/com.mitchellh.ghostty/config'}
+      - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/.config/ghostty/config'}
       - { src: '~/Code/personal/dotfiles/lazygit/config.yml' , dest: '~/Library/Application Support/lazygit/config.yml'}
       # - { src: '~/Code/personal/dotfiles/kubeswitch/switch-config.yaml' , dest: '~/.kube/switch-config.yaml'}
+    ignore_errors: true
   - name: Find all custom zsh files
     find:
       paths: ~/Code/personal/dotfiles/zsh/oh-my-zsh
