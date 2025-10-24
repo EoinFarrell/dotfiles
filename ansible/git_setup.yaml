@@ -3,34 +3,18 @@
 - name: "Git Setup"
   hosts: 127.0.0.1
   connection: local
-  tasks:
-  - name: Setup Code dirs
-    ansible.builtin.file:
-      path: ~/Code/personal
-      state: directory
-      recurse: yes
-  - name: Clone personal repos
-    ansible.builtin.git:
-      repo: "https://github.com/EoinFarrell/{{ item }}.git"
-      dest: ~/Code/personal/{{ item }}
-      update: no
-    loop:
+  vars:
+    # Reusable lists so they can be referenced by multiple tasks
+    personal_repos:
       - dotfiles
       - notes.eoinfarrell.dev
-  - name: Create dirs for symbolic links
-    ansible.builtin.file:
-      path: "{{ item }}"
-      state: directory
-      recurse: yes
-    loop:
+
+    link_dirs:
       - ~/.config/superfile
       - ~/.config/bat
-  - name: Create a symbolic links
-    ansible.builtin.file:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-      state: link
-    loop:
+
+    # List of maps for creating symlinks (src -> dest)
+    dotfile_links:
       - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
       - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
       - { src: '~/Code/personal/dotfiles/git/.gitconfig' , dest: '~/.gitconfig'}
@@ -44,7 +28,39 @@
       - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/Library/Application Support/com.mitchellh.ghostty/config'}
       - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/.config/ghostty/config'}
       - { src: '~/Code/personal/dotfiles/lazygit/config.yml' , dest: '~/Library/Application Support/lazygit/config.yml'}
-      # - { src: '~/Code/personal/dotfiles/kubeswitch/switch-config.yaml' , dest: '~/.kube/switch-config.yaml'}
+
+    # Placeholder for files to remove before creating links (maps with src/dest)
+    remove_dotfiles: []
+  tasks:
+  - name: Setup Code dirs
+    ansible.builtin.file:
+      path: ~/Code/personal
+      state: directory
+      recurse: yes
+  - name: Clone personal repos
+    ansible.builtin.git:
+      repo: "https://github.com/EoinFarrell/{{ item }}.git"
+      dest: ~/Code/personal/{{ item }}
+      update: no
+    loop: "{{ personal_repos }}"
+  - name: Create dirs for symbolic links
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      recurse: yes
+    loop: "{{ link_dirs }}"
+  - name: Remove existing dotfiles
+    ansible.builtin.file:
+      path: "{{ item.dest }}"
+      state: absent
+    loop: "{{ dotfile_links }}"
+    ignore_errors: true
+  - name: Create a symbolic links
+    ansible.builtin.file:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      state: link
+    loop: "{{ dotfile_links }}"
     ignore_errors: true
   - name: Find all custom zsh files
     find:
@@ -66,3 +82,5 @@
       path: "~/.config/tmuxinator/{{ item.path | basename }}"
       state: link
     with_items: "{{ findTmuxinator.files }}"
+  - name: Get latest
+    command: getLatestPackages
