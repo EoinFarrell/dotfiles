@@ -34,14 +34,24 @@ getLatestPackages() {
 
     # python3 -m pip install --upgrade pip &
 
-    kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
-    switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
+    if command -v kubectl >/dev/null 2>&1
+    then
+        kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
+    fi
 
-    brew outdated --json | runGoScript | xargs brew upgrade
+    if command -v switch >/dev/null 2>&1
+    then
+        switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
+    fi
     
-    echo "----Brew Outdated----"
-    brew outdated
-    echo "---------------------"
+    if switch -v kubectl >/dev/null 2>&1
+    then
+        brew outdated --json | runGoScript | xargs brew upgrade
+    
+        echo "----Brew Outdated----"
+        brew outdated
+        echo "---------------------"
+    fi
 
     ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 $DOTFILES/ansible/git_setup.yaml
 

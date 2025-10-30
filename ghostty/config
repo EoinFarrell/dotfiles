@@ -23,5 +23,5 @@ selection-foreground=#EBE6D7
 selection-background=#304251
 font-family = MesloLGM Nerd Font
 
-keybind = performable:ctrl+c=copy_to_clipboard # copy if theres a selection else send sigint
-keybind = ctrl+v=paste_from_clipboard
+# keybind = performable:ctrl+c=copy_to_clipboard # copy if theres a selection else send sigint
+# keybind = ctrl+v=paste_from_clipboard

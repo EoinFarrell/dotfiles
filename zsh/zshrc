@@ -24,16 +24,23 @@ plugins=(
     docker
     docker-compose
     git
-    # kubectl
-    kubectl-autocomplete
     # macos
     git-open
-    switch-autocomplete
     # tmuxinator
     zsh-autocomplete
     zsh-autosuggestions
     zsh-syntax-highlighting
 )
+
+# Add kubectl-autocomplete plugin only if kubectl is installed
+if command -v kubectl >/dev/null 2>&1; then
+  plugins+=(kubectl-autocomplete)
+fi
+
+# Add kubectl-autocomplete plugin only if kubectl is installed
+if command -v switch >/dev/null 2>&1; then
+  plugins+=(switch-autocomplete)
+fi
 
 source $ZSH/oh-my-zsh.sh
 

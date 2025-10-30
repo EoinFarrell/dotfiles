@@ -14,6 +14,7 @@ source $DOTFILES/zsh/functions.sh
 
 # loop or direct options
 for f in $DOTFILES/zsh/startup/*; do source $f;done
-# source $DOTFILES/zsh/startup/startup.sh
 
-source $DOTFILES_WD/zsh/init.sh
+if [ -r "$DOTFILES_WD/zsh/init.sh" ]; then
+	source "$DOTFILES_WD/zsh/init.sh"
+fi

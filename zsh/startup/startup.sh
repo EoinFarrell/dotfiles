@@ -1,17 +1,18 @@
-export DOCKER_FOR_MAC_ENABLED=true
+if [[ $OSTYPE == 'darwin'* ]]
+then
+  export DOCKER_FOR_MAC_ENABLED=true
 
-# Allow older ruby versions to run
-export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
-export RUBY_CFLAGS="-w"
-export LDFLAGS="-L/opt/homebrew/opt/readline/lib:$LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/readline/include:$CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/readline/lib/pkgconfig:$PKG_CONFIG_PATH"
-export optflags="-Wno-error=implicit-function-declaration"
-export LDFLAGS="-L/opt/homebrew/opt/libffi/lib:$LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/libffi/include:$CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
-
-
+  # Allow older ruby versions to run
+  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
+  export RUBY_CFLAGS="-w"
+  export LDFLAGS="-L/opt/homebrew/opt/readline/lib:$LDFLAGS"
+  export CPPFLAGS="-I/opt/homebrew/opt/readline/include:$CPPFLAGS"
+  export PKG_CONFIG_PATH="/opt/homebrew/opt/readline/lib/pkgconfig:$PKG_CONFIG_PATH"
+  export optflags="-Wno-error=implicit-function-declaration"
+  export LDFLAGS="-L/opt/homebrew/opt/libffi/lib:$LDFLAGS"
+  export CPPFLAGS="-I/opt/homebrew/opt/libffi/include:$CPPFLAGS"
+  export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
+fi
 
 # Nix
 # if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
