@@ -5,6 +5,7 @@
 [core]
 	excludesFile = ~/.gitignore
 	pager = delta
+	editor = hx
 [init]
 	defaultBranch = main
 [push]
