@@ -6,6 +6,7 @@
 	excludesFile = ~/.gitignore
 	pager = delta
 	editor = hx
+	commentChar = /
 [init]
 	defaultBranch = main
 [push]
