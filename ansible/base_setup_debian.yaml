@@ -4,29 +4,84 @@
   hosts: localhost
   tasks:
 
-    - name: 
+    - name: Create Tmp dir
       file:
         path: ~/tmp
         state: directory
 
     ### Add Repos ###
 
-    - name: "Setup Docker keyring"
-      command: install -m 0755 -d /etc/apt/keyrings
+    - name: Get DEB architecture
+      shell: dpkg --print-architecture
+      register: deb_architecture
 
-    - name: Add docker apt key
-      ansible.builtin.get_url:
-        url: https://download.docker.com/linux/debian/gpg
-        dest: /etc/apt/keyrings/docker.asc
-        # checksum: sha256:bb42f0db45d46bab5f9ec619e1a47360b94c27142e57aa71f7050d08672309e0
-      become: true
+    - name: Setup Keyring
+      file: 
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+      
+    - name: Docker Apt
+      block: 
+      - name: Check that docker key exists
+        stat:
+          path: /etc/apt/keyrings/docker.asc
+        register: docker_key_stat_result
+      
 
-    - name: Add docker apt repo
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian/ {{ ansible_distribution_release }} stable"
-        state: present
-      become: true
-    
+      - name: Add docker apt key
+        ansible.builtin.get_url:
+          url: https://download.docker.com/linux/debian/gpg
+          dest: /etc/apt/keyrings/docker.asc
+        when: not docker_key_stat_result.stat.exists
+        become: true
+
+      - name: Add docker apt repo
+        ansible.builtin.apt_repository:
+          repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian/ {{ ansible_distribution_release }} stable"
+          state: present
+        become: true
+
+    - name: Terraform Apt
+      block: 
+      - name: Check that Terraform key exists
+        stat:
+          path: /etc/apt/keyrings/terraform.asc
+        register: terraform_key_stat_result
+      
+      - name: Add terraform apt key
+        ansible.builtin.get_url:
+          url: https://apt.releases.hashicorp.com/gpg
+          dest: /etc/apt/keyrings/terraform.asc
+        when: not terraform_key_stat_result.stat.exists
+        become: true
+
+      - name: Add Terraform apt repo
+        ansible.builtin.apt_repository:
+          repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/terraform.asc] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+          state: present
+        become: true
+
+    - name: Tailscale Apt
+      block: 
+      - name: Check that Tailscale key exists
+        stat:
+          path: /etc/apt/keyrings/tailscale.asc
+        register: tailscale_key_stat_result
+      
+      - name: Add tailscale apt key
+        ansible.builtin.get_url:
+          url: https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg
+          dest: /etc/apt/keyrings/tailscale.asc
+        when: not tailscale_key_stat_result.stat.exists
+        become: true
+
+      - name: Add Tailscale apt repo
+        ansible.builtin.apt_repository:
+          repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/tailscale.asc] https://pkgs.tailscale.com/stable/debian {{ ansible_distribution_release }} main"
+          state: present
+        become: true
+      
     # - name: Add Ghossty Apt key
     #   command: curl -fsSL https://download.opensuse.org/repositories/home:clayrisser:bookworm/Debian_12/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_clayrisser_bookworm.gpg > /dev/null
 
@@ -67,15 +122,19 @@
       apt:
         pkg:
           - apt-transport-https
+          - build-essential
           - curl
           - ca-certificates
           - git
           - hstr
           - gpg
+          - gnupg
           - jq
           - lsd
           - rsync
+          - tailscale
           - tig
+          - terraform
           - tmux
           - wget2
           - nfs-common
@@ -86,10 +145,6 @@
         state: latest
         update_cache: false
       become: true
-    
-    ### Install Additional Software ###
-    # - name: Install Tailscale
-    #   command: curl -fsSL https://tailscale.com/install.sh | sh
     
     ### Docker Install ###
     - name: Install base packages
@@ -119,14 +174,10 @@
 
     ### ZSH ###
 
-    - name: Check that the somefile.conf exists
+    - name: Check that ~/.zshrc exists
       stat:
         path: ~/.zshrc
       register: zshrc_stat_result
-
-    - name: Make Zsh default shell
-      command: chsh -s /bin/zsh
-      become: true
 
     - name: Download zsh installer
       get_url: 
@@ -150,7 +201,43 @@
         name: feoin
         shell: /bin/zsh
       become: true
+
+    - name: Make Zsh default shell
+      command: chsh -s /bin/zsh
+      become: true
       
+    ### Linuxbrew ###
+
+    - name: Check that /home/linuxbrew exists
+      stat:
+        path: /home/linuxbrew/.linuxbrew
+      register: linuxbrew_stat_result
+      become: true
+
+    - name: Download Linuxbrew installer
+      get_url: 
+        url: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+        dest: ~/tmp/linuxbrew-installer.sh
+        mode: '0755'
+      when: not linuxbrew_stat_result.stat.exists
+        
+    - name: Execute the Linuxbrew-installer.sh
+      shell: ~/tmp/linuxbrew-installer.sh
+      when: not linuxbrew_stat_result.stat.exists
+      become: true
+
+    - name: Remove the Linuxbrew-installer.sh
+      file: 
+        path: ~/tmp/linuxbrew-installer.sh 
+        state: absent
+      when: not linuxbrew_stat_result.stat.exists
+
+    - name: Install LinuxBrew Packages
+      community.general.homebrew:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - tldr
     
         
     ### NFS Directories ###

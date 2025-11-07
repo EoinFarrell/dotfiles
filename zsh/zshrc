@@ -46,3 +46,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Added by Windsurf
 export PATH="/Users/eoin.farrell/.codeium/windsurf/bin:$PATH"
+
+if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
