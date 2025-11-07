@@ -161,7 +161,7 @@ weather() {
     else
         curl http://v2.wttr.in/dublin
     fi
-}   
+}
 
 testInternet(){
     watch -n 1 start=$SECONDS
@@ -249,12 +249,20 @@ tm(){
 #     export EDITOR="code --wait"
 # }
 
-function tmuxPercent(){
+function tmuxHPercent(){
     height="$(tmux list-windows -F "#{window_height}" | head -n1)"
     echo $height
     newHeight=$(echo "$height/100*$1" | bc -l | xargs printf %.0f)
     echo $newHeight
     tmux resize-pane -y $newHeight -t $2
+}
+
+function tmuxVPercent(){
+    width="$(tmux list-windows -F "#{window_width}" | head -n1)"
+    echo $width
+    newWidth=$(echo "$width/100*$1" | bc -l | xargs printf %.0f)
+    echo $newWidth
+    tmux resize-pane -x $newWidth -t $2
 }
 
 function tmuxUp(){
@@ -281,4 +289,78 @@ function finder {
 
 function gitShallowCloneToFull(){
     git fetch --unshallow
+}
+
+function findLatestFile(){
+    find $1 -maxdepth 1 -type f -exec ls -t {} + | head -1
+}
+
+function findLatestDownload(){
+    findLatestFile "$HOME/Downloads"
+}
+
+function findLatestScreenshot(){
+    findLatestFile "$HOME/Documents/Screenshots"
+}
+
+function copyLatestFile(){
+    latestFile=$(findLatestFile "$1")
+    echo "Copying latest file: $latestFile"
+    pbcopy < "$latestFile"
+}
+
+function copyLatestImage(){
+    latestImage=$(findLatestFile "$1")
+    echo "Copying latest image: $latestImage"
+    osascript -e "set the clipboard to (read (POSIX file \"$latestImage\") as JPEG picture)"
+}
+
+function copyLatestDownload(){
+    copyLatestFile "$HOME/Downloads"
+}
+
+function copyLatestScreenshot(){
+    copyLatestImage "$HOME/Documents/Screenshots"
+}
+
+function replaceInFiles(){
+    FILENAME_TO_FIND=$1
+    SEARCH_TEXT_INPUT=$2
+    REPLACEMENT_INPUT=$3
+    SEARCH_DIR="."
+
+    # Handle search text - can be direct text or a file path
+    if [ -f "$SEARCH_TEXT_INPUT" ]; then
+        echo "Reading search text from file: $SEARCH_TEXT_INPUT"
+        SEARCH_TEXT=$(< "$SEARCH_TEXT_INPUT" tr -d '\r')
+    else
+        SEARCH_TEXT="$SEARCH_TEXT_INPUT"
+    fi
+
+    # Handle replacement text - can be direct text or a file path
+    if [ -f "$REPLACEMENT_INPUT" ]; then
+        echo "Reading replacement text from file: $REPLACEMENT_INPUT"
+        REPLACEMENT_TEXT=$(< "$REPLACEMENT_INPUT" tr -d '\r')
+    else
+        REPLACEMENT_TEXT="$REPLACEMENT_INPUT"
+    fi
+
+    # Use 'find' to locate target files and process them
+    echo "Searching for '$FILENAME_TO_FIND' under '$SEARCH_DIR'..."
+    find "$SEARCH_DIR" -mindepth 2 -name "$FILENAME_TO_FIND" -type f -print0 | while IFS= read -r -d $'\0' TARGET_FILE; do
+
+        echo "Processing: $TARGET_FILE"
+
+        # Use perl for more reliable multiline search and replace
+        # Read entire file, do literal string replacement (quotemeta escapes special chars)
+        SEARCH="$SEARCH_TEXT" REPLACE="$REPLACEMENT_TEXT" perl -i -0777 -pe '$search = quotemeta($ENV{SEARCH}); $replace = $ENV{REPLACE}; s/$search/$replace/g' "$TARGET_FILE"
+    done
+}
+
+function dockerBuild(){
+    docker build --network=host -t $(basename "$PWD"):latest-local .
+}
+
+function dockerRun(){
+    docker run --rm -it --network=host $(basename "$PWD"):latest-local $1
 }
