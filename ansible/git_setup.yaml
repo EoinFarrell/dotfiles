@@ -16,6 +16,7 @@
     # List of maps for creating symlinks (src -> dest)
     dotfile_links:
       - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
+      - { src: '~/Code/personal/dotfiles/zsh/zprofile' , dest: '~/.zprofile'}
       - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
       - { src: '~/Code/personal/dotfiles/git/.gitconfig' , dest: '~/.gitconfig'}
       - { src: '~/Code/personal/dotfiles/tmux/.tmux.conf' , dest: '~/.tmux.conf'}

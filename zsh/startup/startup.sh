@@ -110,6 +110,11 @@ export PATH="$HOME/Library/Python/3.9/bin:$PATH"
 
 alias mux=tmuxinator
 
+# Added by Toolbox App
+if [ -z "~/Library/Application Support/JetBrains/Toolbox/scripts" ]; then
+    export PATH="$PATH:/Users/eoin.farrell/Library/Application Support/JetBrains/Toolbox/scripts"
+fi
+
 # GIT
 
 alias git-destage="git restore --staged ."

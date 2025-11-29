@@ -10,8 +10,6 @@ AWS_CONFIG=~/.aws
 KUBE_CONFIG=~/.kube
 SSH_CONFIG=~/.ssh
 
-source $DOTFILES/zsh/functions.sh
-
 # loop or direct options
 for f in $DOTFILES/zsh/startup/*; do source $f;done
 

@@ -5,55 +5,59 @@ alias runGoScript="(cd $DOTFILES/go-scripts; go run ./script.go)"
 getLatestPackages() {
     # docker system prune -f --volumes
 
-    $HOME/.asdf/bin/asdf update &
-    tldr --update &
-    gem update tmuxinator &
+    func_result="$(isInternetAvailable)"
+        if [ $func_result -eq 1 ]; then
 
-    PLUGINSD=$ZSH_CUSTOM/plugins
+        $HOME/.asdf/bin/asdf update &
+        tldr --update &
+        gem update tmuxinator &
 
-    DIRECTORY=$PLUGINSD/git-open
-    getLatestFromGit $DIRECTORY "https://github.com/paulirish/git-open.git"
+        PLUGINSD=$ZSH_CUSTOM/plugins
 
-    DIRECTORY=$PLUGINSD/zsh-autosuggestions
-    getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-autosuggestions"
+        DIRECTORY=$PLUGINSD/git-open
+        getLatestFromGit $DIRECTORY "https://github.com/paulirish/git-open.git"
 
-    DIRECTORY=$PLUGINSD/zsh-syntax-highlighting
-    getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-syntax-highlighting"
+        DIRECTORY=$PLUGINSD/zsh-autosuggestions
+        getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-autosuggestions"
 
-    DIRECTORY=$PLUGINSD/zsh-autocomplete
-    getLatestFromGit $DIRECTORY https://github.com/marlonrichert/zsh-autocomplete.git
-    # source $DIRECTORY/zsh-autocomplete.plugin.zsh
+        DIRECTORY=$PLUGINSD/zsh-syntax-highlighting
+        getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-syntax-highlighting"
 
-    DIRECTORY=$PLUGINSD/zsh-completions
-    getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-completions"
-    fpath+=$DIRECTORY/src
+        DIRECTORY=$PLUGINSD/zsh-autocomplete
+        getLatestFromGit $DIRECTORY https://github.com/marlonrichert/zsh-autocomplete.git
+        # source $DIRECTORY/zsh-autocomplete.plugin.zsh
 
-    THEMESD=$HOME/.oh-my-zsh/custom/themes
-    DIRECTORY=$THEMESD/powerlevel10k
-    getLatestFromGit $DIRECTORY "https://github.com/romkatv/powerlevel10k.git"
+        DIRECTORY=$PLUGINSD/zsh-completions
+        getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-completions"
+        fpath+=$DIRECTORY/src
 
-    # python3 -m pip install --upgrade pip &
+        THEMESD=$HOME/.oh-my-zsh/custom/themes
+        DIRECTORY=$THEMESD/powerlevel10k
+        getLatestFromGit $DIRECTORY "https://github.com/romkatv/powerlevel10k.git"
 
-    if command -v kubectl >/dev/null 2>&1
-    then
-        kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
+        # python3 -m pip install --upgrade pip &
+
+        if command -v kubectl >/dev/null 2>&1
+        then
+            kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
+        fi
+
+        if command -v switch >/dev/null 2>&1
+        then
+            switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
+        fi
+        
+        if switch -v kubectl >/dev/null 2>&1
+        then
+            brew outdated --json | runGoScript | xargs brew upgrade
+        
+            echo "----Brew Outdated----"
+            brew outdated
+            echo "---------------------"
+        fi
+
+        ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 $DOTFILES/ansible/git_setup.yaml
     fi
-
-    if command -v switch >/dev/null 2>&1
-    then
-        switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
-    fi
-    
-    if switch -v kubectl >/dev/null 2>&1
-    then
-        brew outdated --json | runGoScript | xargs brew upgrade
-    
-        echo "----Brew Outdated----"
-        brew outdated
-        echo "---------------------"
-    fi
-
-    ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 $DOTFILES/ansible/git_setup.yaml
 
     wait
 }
@@ -362,5 +366,10 @@ function dockerBuild(){
 }
 
 function dockerRun(){
-    docker run --rm -it --network=host $(basename "$PWD"):latest-local $1
+    if [ -z "$2" ]; then
+        docker run --rm -it --network=host $(basename "$PWD"):latest-local $1
+    else
+        image="docker-dev-artifactory.workday.com/$2"
+        docker run --rm -it --entrypoint $1 --network=host $image
+    fi
 }

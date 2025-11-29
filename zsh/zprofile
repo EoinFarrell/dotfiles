@@ -1,0 +1,6 @@
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+source ~/Code/personal/dotfiles/zsh/functions.sh
+
+
