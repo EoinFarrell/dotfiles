@@ -1,0 +1,7 @@
+[keys.normal]
+#C-s = ":w" # Maps Ctrl-s to the typable command :w which is an alias for :write (save file)
+#C-o = ":open ~/.config/helix/config.toml" # Maps Ctrl-o to opening of the helix config file
+j = "move_prev_word_end" # Maps the 'a' key to the move_char_left command
+l = "move_next_word_start" # Maps the 'w' key move_line_up
+C-j = "move_prev_long_word_end"
+C-l = "move_next_long_word_start"

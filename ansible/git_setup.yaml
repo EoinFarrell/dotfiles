@@ -29,7 +29,7 @@
       - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/Library/Application Support/com.mitchellh.ghostty/config'}
       - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/.config/ghostty/config'}
       - { src: '~/Code/personal/dotfiles/lazygit/config.yml' , dest: '~/Library/Application Support/lazygit/config.yml'}
-
+      - { src: '~/Code/personal/dotfiles/helix/config.toml', dest: '~/.config/helix/config.toml'}
     # Placeholder for files to remove before creating links (maps with src/dest)
     remove_dotfiles: []
   tasks:
