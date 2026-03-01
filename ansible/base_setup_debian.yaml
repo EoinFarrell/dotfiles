@@ -66,19 +66,28 @@
       block: 
       - name: Check that Tailscale key exists
         stat:
-          path: /etc/apt/keyrings/tailscale.asc
+          path: /etc/apt/keyrings/tailscale.gpg
         register: tailscale_key_stat_result
       
       - name: Add tailscale apt key
         ansible.builtin.get_url:
           url: https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg
-          dest: /etc/apt/keyrings/tailscale.asc
-        when: not tailscale_key_stat_result.stat.exists
+          dest: /etc/apt/keyrings/tailscale.gpg
+          force: yes
+          mode: '0644'
         become: true
 
       - name: Add Tailscale apt repo
         ansible.builtin.apt_repository:
-          repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/tailscale.asc] https://pkgs.tailscale.com/stable/debian {{ ansible_distribution_release }} main"
+          repo: "deb [signed-by=/etc/apt/keyrings/tailscale.gpg] https://pkgs.tailscale.com/stable/debian {{ ansible_distribution_release }} main"
+          state: present
+        become: true
+
+    - name: Debian Contrib & Non-Free (steam)
+      block: 
+      - name: Add Debian Contrib & Non-Free apt repo
+        ansible.builtin.apt_repository:
+          repo: "deb http://deb.debian.org/debian/ {{ ansible_distribution_release }} contrib non-free"
           state: present
         become: true
       
@@ -140,6 +149,7 @@
           - nfs-common
           # - ghossty
           - software-properties-common
+          # - steam-installer
           - zsh
           # - openssh-server
         state: latest
@@ -238,6 +248,7 @@
         state: present
       loop:
         - tldr
+        - helix
     
         
     ### NFS Directories ###
