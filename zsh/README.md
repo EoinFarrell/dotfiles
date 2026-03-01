@@ -17,3 +17,10 @@ security find-generic-password -s test -w #password only
 
 security delete-generic-password -a test -s test
 ```
+
+## SOPS
+
+```bash
+sops encrypt --input-type dotenv .env > .env.enc
+sops decrypt --input-type dotenv --output-type dotenv .env.enc > .env
+```

@@ -1,4 +1,13 @@
+# work
 *zendesk*
 *vmware*
 *workday*
+
+# mac
 .DS_STORE
+
+# secrets
+.env
+*.key
+*.pem
+credentials
