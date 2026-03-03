@@ -118,7 +118,28 @@ fi
 # GIT
 
 alias git-destage="git restore --staged ."
-alias git-clean="git-destage && git restore . && git clean -fd"
+
+git-clean() {
+    local target=$1
+
+    if [ -z "$target" ]; then
+        echo "No directory specified. Running nuclear clean..."
+        git reset
+        git restore .
+        git clean -fd
+    else
+        echo "Cleaning all instances of: '$target'..."
+        # Using :(glob)**/ ensures we find the folder at any depth
+        # and ignores the error if one of the patterns doesn't find a match
+        git reset -- "**/$target/*" 2>/dev/null
+        git restore "**/$target/*" 2>/dev/null
+        git clean -fd -- "**/$target/*" 2>/dev/null
+
+        git reset -- "**/$target" 2>/dev/null
+        git restore "**/$target" 2>/dev/null
+        git clean -fd -- "**/$target" 2>/dev/null
+    fi
+}
 
 export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
 export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
