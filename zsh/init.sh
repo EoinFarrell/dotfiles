@@ -10,6 +10,7 @@ AWS_CONFIG=~/.aws
 KUBE_CONFIG=~/.kube
 SSH_CONFIG=~/.ssh
 SOPS_CONFIG=~/.config/sops/sops.yaml
+export EDITOR=hx
 
 # Decrypt and export environment variables from encrypted .env file
 if [ -r "$DOTFILES/zsh/.env.enc" ]; then
