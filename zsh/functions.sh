@@ -1,7 +1,5 @@
 #!/bin/bash
 
-alias runGoScript="(cd $DOTFILES/go-scripts; go run ./script.go)"
-
 getLatestPackages() {
     # docker system prune -f --volumes
 
@@ -49,7 +47,7 @@ getLatestPackages() {
         
         if switch -v kubectl >/dev/null 2>&1
         then
-            brew outdated --json | runGoScript | xargs brew upgrade
+            cd $DOTFILES/go-scripts && brew outdated --json | go run ./script.go | xargs brew upgrade
         
             echo "----Brew Outdated----"
             brew outdated
@@ -365,11 +363,30 @@ function dockerBuild(){
     docker build --network=host -t $(basename "$PWD"):latest-local .
 }
 
-function dockerRun(){
-    if [ -z "$2" ]; then
-        docker run --rm -it --network=host $(basename "$PWD"):latest-local $1
+function dockerPull(){
+    if [ -n "$1" ]; then
+        image="$DOCKER_DEFAULT_REGISTRY_ADDRESS/$1"
+        docker pull $image
+    elif [ -n "$DOCKER_IMAGE" ]; then
+        docker pull $DOCKER_IMAGE
     else
-        image="docker-dev-artifactory.workday.com/$2"
+        echo "No image specified to pull"
+    fi
+}
+
+function setDockerImage(){
+    export DOCKER_IMAGE="$DOCKER_DEFAULT_REGISTRY_ADDRESS/$1"
+}
+
+function dockerRun(){
+    if [ -n "$2" ]; then
+        image="$DOCKER_DEFAULT_REGISTRY_ADDRESS/$2"
         docker run --rm -it --entrypoint $1 --network=host $image
+    elif [ -n "$1"]; then
+        docker run --rm -it --network=host $(basename "$PWD"):latest-local $1
+    elif [ -n "$DOCKER_IMAGE" ]; then
+        docker run --rm -it --network=host $DOCKER_IMAGE
+    else
+        echo "No command or image specified to run"
     fi
 }
