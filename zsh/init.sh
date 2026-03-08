@@ -12,8 +12,11 @@ SSH_CONFIG=~/.ssh
 SOPS_CONFIG=~/.config/sops/sops.yaml
 export EDITOR=hx
 
+# Source functions needed by startup scripts
+source ~/Code/personal/dotfiles/zsh/functions.sh
+
 # Decrypt and export environment variables from encrypted .env file
-if [ -r "$DOTFILES/zsh/.env.enc" ]; then
+if [ -r "$DOTFILES/zsh/.env.enc" ] && command -v sops >/dev/null 2>&1; then
     eval "$(sops decrypt --input-type dotenv --output-type dotenv $DOTFILES/zsh/.env.enc | sed 's/^/export /')"
 fi
 
