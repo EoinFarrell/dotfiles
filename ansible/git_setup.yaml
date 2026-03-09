@@ -12,6 +12,7 @@
     link_dirs:
       - ~/.config/superfile
       - ~/.config/bat
+      - ~/.config/ghostty
 
     # List of maps for creating symlinks (src -> dest)
     dotfile_links:
@@ -86,4 +87,10 @@
       state: link
     with_items: "{{ findTmuxinator.files }}"
   - name: Get latest
-    command: getLatestPackages
+    shell: |
+      export DOTFILES=~/Code/personal/dotfiles
+      export ZSH_CUSTOM=~/.oh-my-zsh/custom
+      source $DOTFILES/zsh/functions.sh
+      getLatestPackages --skip-ansible
+    args:
+      executable: /bin/zsh

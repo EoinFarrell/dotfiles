@@ -2,6 +2,10 @@
 
 getLatestPackages() {
     # docker system prune -f --volumes
+    local skip_ansible=0
+    for arg in "$@"; do
+        [ "$arg" = "--skip-ansible" ] && skip_ansible=1
+    done
 
     func_result="$(isInternetAvailable)"
         if [ $func_result -eq 1 ]; then
@@ -54,7 +58,9 @@ getLatestPackages() {
             echo "---------------------"
         fi
 
-        ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 $DOTFILES/ansible/git_setup.yaml
+        if [ $skip_ansible -eq 0 ]; then
+            ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 $DOTFILES/ansible/git_setup.yaml
+        fi
     fi
 
     wait
@@ -388,5 +394,20 @@ function dockerRun(){
         docker run --rm -it --network=host $DOCKER_IMAGE
     else
         echo "No command or image specified to run"
+    fi
+}
+
+# Decrypt a sops-encrypted file only if content has changed, to avoid
+# unnecessary writes that would trigger sops-watch to re-encrypt.
+_sops_decrypt_if_changed() {
+    local enc="$1" dest="$2" input_type="$3"
+    [ -r "$enc" ] || return 0
+    local tmp
+    tmp=$(mktemp)
+    sops decrypt --input-type "$input_type" --output-type "$input_type" "$enc" > "$tmp"
+    if ! cmp -s "$tmp" "$dest"; then
+        mv "$tmp" "$dest"
+    else
+        rm "$tmp"
     fi
 }
