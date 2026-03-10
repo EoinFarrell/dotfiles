@@ -86,6 +86,15 @@
       path: "~/.config/tmuxinator/{{ item.path | basename }}"
       state: link
     with_items: "{{ findTmuxinator.files }}"
+  - name: Clone fzf-tab plugin
+    ansible.builtin.git:
+      repo: "https://github.com/Aloxaf/fzf-tab.git"
+      dest: ~/.oh-my-zsh/custom/plugins/fzf-tab
+      update: yes
+  - name: Install gitstatus binary for powerlevel10k
+    ansible.builtin.shell:
+      cmd: ~/.oh-my-zsh/custom/themes/powerlevel10k/gitstatus/install
+      creates: ~/.oh-my-zsh/custom/themes/powerlevel10k/gitstatus/usrbin/gitstatusd-darwin-arm64
   - name: Get latest
     shell: |
       export DOTFILES=~/Code/personal/dotfiles

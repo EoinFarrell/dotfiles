@@ -400,14 +400,32 @@ function dockerRun(){
 # Decrypt a sops-encrypted file only if content has changed, to avoid
 # unnecessary writes that would trigger sops-watch to re-encrypt.
 _sops_decrypt_if_changed() {
-    local enc="$1" dest="$2" input_type="$3"
-    [ -r "$enc" ] || return 0
+    local enc="$1" dest="$2" input_type="$3" output_type="${4:-$3}"
+    [ -s "$enc" ] || return 0
     local tmp
     tmp=$(mktemp)
-    sops decrypt --input-type "$input_type" --output-type "$input_type" "$enc" > "$tmp"
+    sops decrypt --input-type "$input_type" --output-type "$output_type" "$enc" > "$tmp"
     if ! cmp -s "$tmp" "$dest"; then
         mv "$tmp" "$dest"
     else
         rm "$tmp"
     fi
+}
+
+# Sets env vars required to build/install a Ruby version via asdf.
+# Call manually before running `asdf install ruby <version>`.
+rubyBuildEnv() {
+  local brew_prefix
+  brew_prefix="$(brew --prefix)"
+  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=${brew_prefix}/opt/openssl@1.1"
+  export RUBY_CFLAGS="-w"
+  export optflags="-Wno-error=implicit-function-declaration"
+  export LDFLAGS="-L${brew_prefix}/opt/readline/lib -L${brew_prefix}/opt/libffi/lib"
+  export CPPFLAGS="-I${brew_prefix}/opt/readline/include -I${brew_prefix}/opt/libffi/include"
+  export PKG_CONFIG_PATH="${brew_prefix}/opt/readline/lib/pkgconfig:${brew_prefix}/opt/libffi/lib/pkgconfig"
+  echo "Ruby build env set (prefix: ${brew_prefix})"
+}
+
+rbBuildEnv() {
+  rubyBuildEnv
 }

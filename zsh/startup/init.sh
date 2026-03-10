@@ -1,3 +1,5 @@
+export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+
 CODE=~/Code
 PERSONAL=~/Code/personal
 DOTFILES=~/Code/personal/dotfiles
@@ -9,7 +11,7 @@ HOMELAB=~/Code/personal/homelab.eoinfarrell.dev
 AWS_CONFIG=~/.aws
 KUBE_CONFIG=~/.kube
 SSH_CONFIG=~/.ssh
-SOPS_CONFIG=~/.config/sops/sops.yaml
+export SOPS_CONFIG=~/.config/sops/sops.yaml
 export EDITOR=hx
 
 # Source functions needed by startup scripts
@@ -20,8 +22,7 @@ if [ -r "$DOTFILES/zsh/.env.enc" ] && command -v sops >/dev/null 2>&1; then
     eval "$(sops decrypt --input-type dotenv --output-type dotenv $DOTFILES/zsh/.env.enc | sed 's/^/export /')"
 fi
 
-# loop or direct options
-for f in $DOTFILES/zsh/startup/*; do source $f;done
+source $DOTFILES/zsh/startup/random.sh
 
 if [ -r "$DOTFILES_WD/zsh/init.sh" ]; then
 	source "$DOTFILES_WD/zsh/init.sh"
