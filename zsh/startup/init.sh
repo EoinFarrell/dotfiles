@@ -15,6 +15,7 @@ export SOPS_CONFIG=~/.config/sops/sops.yaml
 export EDITOR=hx
 
 # Source functions needed by startup scripts
+source ~/Code/personal/dotfiles/zsh/startup/validation.sh
 source ~/Code/personal/dotfiles/zsh/functions.sh
 
 # Decrypt and export environment variables from encrypted .env file
