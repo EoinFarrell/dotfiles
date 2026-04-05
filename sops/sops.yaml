@@ -1,7 +1,10 @@
 creation_rules:
-  - path_regex: .*Code/personal.*
+  - path_regex: .*Code/personal/dotfiles.*
     age:
       - age1553qx4mrvtxc680s2r69zqcf0jrtftvy37cpcg74zjddx27dk53s85a6w9
   - path_regex: .*Code/workday.*
     age: 
       - age1m600dczt54z8c4u4cyv50h6cdujcaud4gaxtk4s2f346hxfv0s9qh5ztkf
+  - path_regex: .*Code/personal/homelab.eoinfarrell.dev.*
+    age:
+      - age1ekds3jasvu04vvcll6r8hgna8l70twqatx3thpjxejggmv96hyrqp8vcwy
