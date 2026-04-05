@@ -15,16 +15,24 @@ if command -v kubectl >/dev/null 2>&1; then
 fi
 
 # ASDF
-if command -v asdf >/dev/null 2>&1
-then
+# Try multiple common asdf installation locations
+if [ -f "$HOME/.asdf/asdf.sh" ]; then
 	. "$HOME/.asdf/asdf.sh"
-	# append completions to fpath
+elif [ -f "/opt/homebrew/opt/asdf/libexec/asdf.sh" ]; then
+	. "/opt/homebrew/opt/asdf/libexec/asdf.sh"
+elif [ -f "/usr/local/opt/asdf/libexec/asdf.sh" ]; then
+	. "/usr/local/opt/asdf/libexec/asdf.sh"
+elif [ -f "/home/linuxbrew/.linuxbrew/opt/asdf/libexec/asdf.sh" ]; then
+	. "/home/linuxbrew/.linuxbrew/opt/asdf/libexec/asdf.sh"
+fi
+
+# Append completions to fpath if ASDF_DIR is set
+if [ -n "${ASDF_DIR}" ]; then
 	fpath=(${ASDF_DIR}/completions $fpath)
 fi
 
 #AWS
-if command -v asdf >/dev/null 2>&1
-then
+if [ -d "$HOME/.awsume/zsh-autocomplete" ]; then
 	#AWSume alias to source the AWSume script
 	alias awsume="source awsume"
 	#Auto-Complete function for AWSume
