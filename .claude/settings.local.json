@@ -6,7 +6,10 @@
       "Bash(time zsh:*)",
       "Bash(do time:*)",
       "Bash(zsh:*)",
-      "Bash(ansible-playbook:*)"
+      "Bash(ansible-playbook:*)",
+      "Bash(test:*)",
+      "Bash(command -v:*)",
+      "Bash(dpkg:*)"
     ]
   }
 }
