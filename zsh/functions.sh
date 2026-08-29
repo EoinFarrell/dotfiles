@@ -75,12 +75,6 @@ isInternetAvailable() {
     fi
 }
 
-isItermSession() {
-    [ "$TERM_PROGRAM" = "iTerm.app" ]
-    return
-}
-
-
 isTmuxSession() {
     if [ "$TERM_PROGRAM" != "tmux" ]; then
         echo "0"
@@ -417,7 +411,7 @@ _sops_decrypt_if_changed() {
 rubyBuildEnv() {
   local brew_prefix
   brew_prefix="$(brew --prefix)"
-  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=${brew_prefix}/opt/openssl@1.1"
+  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=${brew_prefix}/opt/openssl@3"
   export RUBY_CFLAGS="-w"
   export optflags="-Wno-error=implicit-function-declaration"
   export LDFLAGS="-L${brew_prefix}/opt/readline/lib -L${brew_prefix}/opt/libffi/lib"

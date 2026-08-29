@@ -16,10 +16,9 @@
 - kubecolor/tap/kubecolor
 - kubectx
 - lsd
-- mailhog
 - mdcat
 - mysql
-- openssl@1.1
+- openssl@3
 - prettier
 - protobuf
 - rsync

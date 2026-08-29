@@ -1,11 +1,3 @@
-# function prompt_my_devbox() {
-#     if [[ -z "${DEVBOX_SHELL_ENABLED}" ]]; then
-#         return
-#     else
-#         p10k segment -i '</>' -f blue
-#     fi
-# }
-
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -31,7 +23,6 @@ POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
 POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='red'
 
-# POWERLEVEL9K_DIR_PACKAGE_FILES=(devbox.json)
 POWERLEVEL9K_SHORTEN_STRATEGY=truncate_with_package_name
 POWERLEVEL9K_DIR_TRUNCATE_BEFORE_MARKER=false
 # Don't shorten this many last directory segments. They are anchors.

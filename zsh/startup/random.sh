@@ -3,12 +3,6 @@ then
   export DOCKER_FOR_MAC_ENABLED=true
 fi
 
-# Nix
-# if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-#   source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-# fi
-# End Nix
-
 #LSD
 alias ls='lsd'
 alias l='ls -l'
@@ -130,17 +124,8 @@ git-clean() {
     fi
 }
 
-export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
-export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
-export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
-export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
 export PATH=${PATH/\/Users\/eoinfarrell\/Library\/Application Support\/JetBrains\/Toolbox\/scripts:}
 export PATH=${PATH/\/Users\/eoinfarrell\/Library\/Application Support\/JetBrains\/Toolbox\/scripts}
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/local\/bin:}
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/bin:}
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/appleinternal\/bin:}
-
-if isItermSession; then
-  getLatestPackages
-  test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-fi

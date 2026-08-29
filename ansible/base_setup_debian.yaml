@@ -249,6 +249,11 @@
       loop:
         - tldr
         - helix
+
+    ### asdf ###
+
+    - name: Install asdf Node.js
+      ansible.builtin.include_tasks: tasks/asdf_nodejs.yaml
     
         
     ### NFS Directories ###

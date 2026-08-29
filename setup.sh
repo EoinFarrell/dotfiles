@@ -11,17 +11,6 @@ brew install ansible
 # mkdir Code && cd Code && mkdir personal && cd personal
 # git clone https://github.com/EoinFarrell/dotfiles.git
 
-# brew install --cask iterm2
-# curl -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash
-
-# brew install tmux
-# brew install zsh
-# brew install hstr
-# brew install lsd
-# brew install tig
-# brew install gh
-# brew install tree
-
 # git clone https://github.com/asdf-vm/asdf.git ~/.asdf #--branch v0.11.3
 
 gh auth login
@@ -47,16 +36,6 @@ gh auth login
 # See bottom section if you always need the full path.
 ps -o comm= $$
 
-#iterm setup
-# install font: https://github.com/romkatv/powerlevel10k#manual-font-installation
-# Create profile, set font to above 
-# set colours to clovis-iterm-colour.itermcolors 
-
-# Nix & Devbox setup
-# https://github.com/jetpack-io/devbox
-sh <(curl -L https://nixos.org/nix/install) --daemon
-curl -fsSL https://get.jetpack.io/devbox | bash
-
 #gui apps
 # brew install --cask zoom
 # brew install --cask slack
@@ -74,7 +53,3 @@ curl -fsSL https://get.jetpack.io/devbox | bash
 
 # brew install --cask obsidian
 
-install https://getsynth.com
-export SYNTH_INSTALL_PATH=~/bin
-curl -sSL https://getsynth.com/install | sh
-synth telemetry disable

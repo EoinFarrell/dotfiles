@@ -25,7 +25,6 @@
       # - google-chrome
       - grandperspective
       # - http-toolkit
-      - iterm2
       - jetbrains-toolbox
       - jordanbaird-ice
       - kdiff3
@@ -72,10 +71,9 @@
       - lazydocker
       - lazygit
       - lsd
-      - mailhog
       - mdcat
       - mysql
-      - openssl@1.1
+      - openssl@3
       - prettier
       - protobuf
       - rsync
@@ -104,15 +102,8 @@
     loop:
       - localsend
       # - todoist
-  - name: Setup asdf vm dirs
-    ansible.builtin.file:
-      path: ~/.asdf
-      state: directory
-      recurse: yes
-  - name: Clone asdfvm
-    ansible.builtin.git:
-      repo: 'https://github.com/asdf-vm/asdf.git'
-      dest: ~/.asdf
+  - name: Install asdf Node.js
+    ansible.builtin.include_tasks: tasks/asdf_nodejs.yaml
   - name: Check zshrc exists
     stat:
       path: ~/.zshrc
