@@ -4,6 +4,10 @@
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+# Bootstrap-only: ansible must exist before ansible-playbook can run and
+# reconcile the rest of the machine. Ongoing package management for user/CLI
+# tools happens via ansible/vars/homebrew_packages.yml, not here — see
+# docs/adr/0001-homebrew-for-user-cli-tools.md.
 brew install ansible
 
 # brew install git

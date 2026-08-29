@@ -1,5 +1,12 @@
 # dotfiles
 
+## Package installation
+
+New user/CLI tools go in `ansible/vars/homebrew_packages.yml` — installed
+via Homebrew on both macOS and Debian. OS-level packages (daemons, kernel
+modules, drivers) stay on apt in `ansible/base_setup_debian.yaml`. See
+`docs/adr/0001-homebrew-for-user-cli-tools.md` for the reasoning.
+
 ## How To
 
 ### Symlink - Create

@@ -1,0 +1,19 @@
+---
+# Shared user/CLI tool installation via Homebrew, used by base_setup.yaml
+# (native Homebrew) and base_setup_debian.yaml (Linuxbrew). The package
+# list itself lives in vars/homebrew_packages.yml — that's the one place
+# to add a new tool.
+- name: Install Homebrew packages
+  community.general.homebrew:
+    name: "{{ homebrew_packages }}"
+    state: present
+
+- name: Tap Homebrew repositories
+  community.general.homebrew_tap:
+    name: "{{ homebrew_taps }}"
+    state: present
+
+- name: Install tapped Homebrew packages
+  community.general.homebrew:
+    name: "{{ homebrew_tap_packages }}"
+    state: present

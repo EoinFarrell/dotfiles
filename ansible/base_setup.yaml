@@ -3,6 +3,8 @@
 - name: "Base Setup"
   hosts: 127.0.0.1
   connection: local
+  vars_files:
+    - vars/homebrew_packages.yml
   tasks:
   - name: Update Homebrew
     community.general.homebrew:
@@ -43,51 +45,20 @@
       state: absent
     loop:
     - fzf
-  - name: Install Packages
+  - name: Install shared Homebrew packages
+    ansible.builtin.include_tasks: tasks/homebrew_packages.yaml
+  - name: Install macOS-only Homebrew packages
     community.general.homebrew:
       name: "{{ item }}"
       state: present
     loop:
-      - ansible
-      - awscli
-      - bat
+      # colima is a Docker Desktop replacement for macOS; Debian already
+      # runs Docker Engine natively via apt, so it has no use there.
       - colima
-      - coreutils
-     # - derailed/k9s/k9s
-      - docker-compose
-      - doggo
-      - gh
-      - git
-      - guile
-      - helm
-      - hstr
-     # - hudochenkov/sshpass/sshpass
-      - hugo
-      - jq
-     # - kubecolor/tap/kubecolor
-      - kubectl
-      - kubectx
-      - kubecolor
-      - lazydocker
-      - lazygit
-      - lsd
-      - mdcat
-      - mysql
-      - openssl@3
-      - prettier
-      - protobuf
-      - rsync
-      - superfile
-      - tig
-      - tealdeer #tldr in rust
-      - tmux
-      - tmuxinator
-      - tree
-      - txn2/tap/kubefwd
-      - watch
-      - wget2
-     # - xo/xo/usql
-      - zsh
+  # localsend and its tap are kept macOS-only rather than moved into the
+  # shared vars/homebrew_packages.yml list, since it's a GUI send/receive
+  # app with no meaningful Linux install path here (same reasoning as the
+  # casks above).
   - name: Tap Homebrew repositorys
     community.general.homebrew_tap:
       name: "{{ item }}"

@@ -1,0 +1,50 @@
+---
+# The one place to add a new user/CLI tool for both macOS and Debian.
+# See docs/adr/0001-homebrew-for-user-cli-tools.md for the reasoning.
+#
+# OS-level packages (daemons, kernel modules, drivers) do NOT belong here —
+# they stay in the OS-specific apt tasks in base_setup_debian.yaml, or in
+# the macOS casks/Rosetta tasks in base_setup.yaml.
+homebrew_packages:
+  - ansible
+  - awscli
+  - bat
+  - coreutils
+  - docker-compose
+  - doggo
+  - gh
+  - git
+  - guile
+  - helix
+  - helm
+  - hstr
+  - hugo
+  - jq
+  - kubectl
+  - kubectx
+  - kubecolor
+  - lazydocker
+  - lazygit
+  - lsd
+  - mdcat
+  - mysql
+  - openssl@3
+  - prettier
+  - protobuf
+  - rsync
+  - superfile
+  - tealdeer # tldr in rust
+  - tig
+  - tmux
+  - tmuxinator
+  - tree
+  - watch
+  - wget2
+  - zsh
+
+# Third-party taps and the formulae that require them.
+homebrew_taps:
+  - txn2/tap
+
+homebrew_tap_packages:
+  - txn2/tap/kubefwd

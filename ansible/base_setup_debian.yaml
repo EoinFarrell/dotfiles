@@ -2,6 +2,8 @@
 # ansible-playbook -i inventory.ini base_setup_debian.yaml
 - name: "Base Setup Debian"
   hosts: localhost
+  vars_files:
+    - vars/homebrew_packages.yml
   tasks:
 
     - name: Create Tmp dir
@@ -130,27 +132,24 @@
     - name: Install base packages
       apt:
         pkg:
+          # OS-level packages and Linuxbrew's own system dependencies only.
+          # User/CLI tools live in vars/homebrew_packages.yml instead — see
+          # docs/adr/0001-homebrew-for-user-cli-tools.md.
           - apt-transport-https
           - build-essential
-          - curl
           - ca-certificates
-          - git
-          - hstr
+          - curl
+          - file
+          - git # also needed to bootstrap Homebrew itself
           - gpg
           - gnupg
-          - jq
-          - lsd
-          - rsync
-          - tailscale
-          - tig
-          - terraform
-          - tmux
-          - wget2
           - nfs-common
+          - procps
           # - ghossty
           - software-properties-common
           # - steam-installer
-          - zsh
+          - tailscale
+          - terraform
           # - openssh-server
         state: latest
         update_cache: false
@@ -242,13 +241,8 @@
         state: absent
       when: not linuxbrew_stat_result.stat.exists
 
-    - name: Install LinuxBrew Packages
-      community.general.homebrew:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - tldr
-        - helix
+    - name: Install shared Homebrew packages
+      ansible.builtin.include_tasks: tasks/homebrew_packages.yaml
 
     ### asdf ###
 
