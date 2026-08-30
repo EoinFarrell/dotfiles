@@ -1,0 +1,29 @@
+# Shared asdf setup used by base_setup.yaml and base_setup_debian.yaml.
+# Installs the asdf plugin and pinned version for every line in
+# asdf/.tool-versions — that file is the single source of truth, so a new
+# runtime only needs adding there, not to this task.
+- name: Setup asdf vm dirs
+  ansible.builtin.file:
+    path: ~/.asdf
+    state: directory
+    recurse: yes
+
+- name: Clone asdfvm
+  ansible.builtin.git:
+    repo: 'https://github.com/asdf-vm/asdf.git'
+    dest: ~/.asdf
+
+- name: Install asdf plugins and versions pinned in tool-versions
+  # No `asdf global`/`asdf set -u` step needed: git_setup.yaml symlinks this
+  # same file to ~/.tool-versions, so asdf already resolves these versions
+  # as the global default once installed.
+  ansible.builtin.shell: |
+    export PATH="${HOME}/.asdf/bin:${PATH}"
+    while read -r name version _; do
+      [ -z "$name" ] && continue
+      case "$name" in \#*) continue ;; esac
+      asdf plugin add "$name" 2>/dev/null || true
+      asdf install "$name" "$version"
+    done < "{{ playbook_dir }}/../asdf/.tool-versions"
+  args:
+    executable: /bin/bash

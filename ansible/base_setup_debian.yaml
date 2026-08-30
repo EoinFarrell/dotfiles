@@ -246,8 +246,8 @@
 
     ### asdf ###
 
-    - name: Install asdf Node.js
-      ansible.builtin.include_tasks: tasks/asdf_nodejs.yaml
+    - name: Install asdf-managed language runtimes
+      ansible.builtin.include_tasks: tasks/asdf_tool_versions.yaml
     
         
     ### NFS Directories ###

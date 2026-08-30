@@ -14,15 +14,14 @@ directive), and Homebrew only ever tracks one installed version at a time
 system-wide, with no per-project switching.
 
 `git_setup.yaml` already symlinks `asdf/.asdfrc` and `asdf/.tool-versions`
-from this repo to `~/.asdfrc` / `~/.tool-versions`, and
-`ansible/tasks/asdf_nodejs.yaml` installs the asdf `nodejs` plugin and the
-version pinned in `asdf/.tool-versions`, run from both
-`base_setup.yaml` (macOS) and `base_setup_debian.yaml` (Debian). Node.js
-was already on asdf; fixing the panic in `go-scripts/script.go` (issue #5)
-needed a Go toolchain to build and test, which surfaced that there was no
-documented rule for where a *second* language runtime should live —
-Homebrew has a `go` formula too, and installing it directly was the
-default reach until corrected.
+from this repo to `~/.asdfrc` / `~/.tool-versions`, and a task run from
+both `base_setup.yaml` (macOS) and `base_setup_debian.yaml` (Debian)
+installed the asdf `nodejs` plugin and the version pinned in
+`asdf/.tool-versions`. Node.js was already on asdf; fixing the panic in
+`go-scripts/script.go` (issue #5) needed a Go toolchain to build and
+test, which surfaced that there was no documented rule for where a
+*second* language runtime should live — Homebrew has a `go` formula
+too, and installing it directly was the default reach until corrected.
 
 ## Decision
 
@@ -42,14 +41,22 @@ default reach until corrected.
 
 - Adding a new language runtime is a one-line addition to
   `asdf/.tool-versions` (e.g. `golang 1.27.0`), matching the existing
-  `nodejs 22.14.0` line.
-- That line alone doesn't provision the runtime on a fresh machine: only
-  Node.js has an ansible task (`tasks/asdf_nodejs.yaml`, run from both
-  playbooks) that runs `asdf plugin add` and `asdf install` for the
-  pinned version. Go was added to `asdf/.tool-versions` without an
-  equivalent `tasks/asdf_golang.yaml` — left as a follow-up, either a
-  second per-runtime task file on the same pattern or a generalised task
-  that loops over every line in `asdf/.tool-versions`.
+  `nodejs 22.14.0` line. No playbook or task-file edit is required: both
+  `base_setup.yaml` and `base_setup_debian.yaml` run the shared
+  `ansible/tasks/asdf_tool_versions.yaml`, which reads
+  `asdf/.tool-versions` line by line and runs `asdf plugin add` /
+  `asdf install` for each pinned runtime. This replaced the earlier
+  per-runtime `tasks/asdf_nodejs.yaml`, which hard-coded the Node.js
+  version and would have needed a near-identical `asdf_golang.yaml`
+  copy-pasted alongside it.
+- The generalised task deliberately skips `asdf global`/`asdf set -u`:
+  that step would just write the same plugin/version pairs into
+  `~/.tool-versions`, which `git_setup.yaml` already symlinks to this
+  same `asdf/.tool-versions` file, so asdf resolves the pinned versions
+  as the global default as soon as they're installed. It's also no
+  longer available as `asdf global` on current asdf (0.18+ renamed it to
+  `asdf set -u`), which the old per-runtime task would have silently
+  hit on a fresh install.
 - `asdf/.asdfrc` (`legacy_version_file = no`) means a runtime won't
   fall back to reading `.nvmrc`/`go.mod`-style version files — the
   pinned version always comes from `.tool-versions`.
