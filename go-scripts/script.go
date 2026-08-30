@@ -2,6 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/Masterminds/semver"
@@ -22,16 +25,22 @@ type Homebrew struct {
 }
 
 func main() {
-	var myStoredVariable Homebrew
+	input, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error reading stdin:", err)
+		os.Exit(1)
+	}
 
-	asdf, _ := script.Stdin().JQ(".").String()
-
-	json.Unmarshal([]byte(asdf), &myStoredVariable)
+	homebrew, err := parseHomebrewJSON(input)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error parsing brew outdated JSON:", err)
+		os.Exit(1)
+	}
 
 	var toUpdate []string
 
-	toUpdate = upgradePackage(myStoredVariable.Casks, toUpdate)
-	toUpdate = upgradePackage(myStoredVariable.Formulae, toUpdate)
+	toUpdate = upgradePackage(homebrew.Casks, toUpdate)
+	toUpdate = upgradePackage(homebrew.Formulae, toUpdate)
 
 	// Join the slice into a single string with newlines
 	toUpdateString := strings.Join(toUpdate, " ")
@@ -44,8 +53,18 @@ func main() {
 	script.NewPipe().WithReader(toUpdateReader).Stdout()
 }
 
+func parseHomebrewJSON(data []byte) (Homebrew, error) {
+	var homebrew Homebrew
+	err := json.Unmarshal(data, &homebrew)
+	return homebrew, err
+}
+
 func upgradePackage(packages []Package, toUpdate []string) []string {
 	for _, v := range packages {
+		if len(v.InstalledVersion) == 0 {
+			continue
+		}
+
 		installed, err := semver.NewConstraint("^" + v.InstalledVersion[0])
 		if err != nil {
 			// Handle constraint not being parsable.
