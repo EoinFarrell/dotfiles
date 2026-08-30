@@ -1,65 +1,108 @@
 #!/bin/bash
 
+# Each _update* step guards on the binary it needs and reports why it
+# skipped, so a missing tool on this machine fails loud instead of
+# silently dropping unrelated steps (e.g. brew upgrades used to be
+# gated on `switch -v kubectl`, which had nothing to do with brew).
+
+_updateAsdf() {
+    if [ -x "$HOME/.asdf/bin/asdf" ]; then
+        "$HOME/.asdf/bin/asdf" update
+    else
+        echo "asdf not found, skipping asdf update"
+    fi
+}
+
+_updateTldr() {
+    if command -v tldr >/dev/null 2>&1; then
+        tldr --update
+    else
+        echo "tldr not found, skipping tldr update"
+    fi
+}
+
+_updateTmuxinator() {
+    if command -v gem >/dev/null 2>&1; then
+        gem update tmuxinator
+    else
+        echo "gem not found, skipping tmuxinator update"
+    fi
+}
+
+_updatePluginRepos() {
+    local pluginsd=$ZSH_CUSTOM/plugins
+
+    getLatestFromGit "$pluginsd/git-open" "https://github.com/paulirish/git-open.git"
+    getLatestFromGit "$pluginsd/zsh-autosuggestions" "https://github.com/zsh-users/zsh-autosuggestions"
+    getLatestFromGit "$pluginsd/zsh-syntax-highlighting" "https://github.com/zsh-users/zsh-syntax-highlighting"
+    getLatestFromGit "$pluginsd/zsh-autocomplete" "https://github.com/marlonrichert/zsh-autocomplete.git"
+
+    local completionsDir=$pluginsd/zsh-completions
+    getLatestFromGit "$completionsDir" "https://github.com/zsh-users/zsh-completions"
+    fpath+=$completionsDir/src
+
+    getLatestFromGit "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" "https://github.com/romkatv/powerlevel10k.git"
+}
+
+# Regenerated file here is loaded via the kubectl-autocomplete oh-my-zsh
+# plugin, added to `plugins=(...)` in zsh/zshrc and sourced from there.
+_updateKubectlCompletion() {
+    if command -v kubectl >/dev/null 2>&1; then
+        kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
+    else
+        echo "kubectl not found, skipping kubectl completion regen"
+    fi
+}
+
+# Regenerated file here is loaded via the switch-autocomplete oh-my-zsh
+# plugin, added to `plugins=(...)` in zsh/zshrc and sourced from there.
+_updateSwitchCompletion() {
+    if command -v switch >/dev/null 2>&1; then
+        switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
+    else
+        echo "switch not found, skipping switch completion regen"
+    fi
+}
+
+_updateBrew() {
+    if ! command -v brew >/dev/null 2>&1; then
+        echo "brew not found, skipping Homebrew upgrade"
+        return
+    fi
+
+    if ! command -v go >/dev/null 2>&1; then
+        echo "go not found, skipping Homebrew upgrade (needed to filter outdated packages)"
+        return
+    fi
+
+    (cd "$DOTFILES/go-scripts" && brew outdated --json | go run ./script.go | xargs brew upgrade)
+
+    echo "----Brew Outdated----"
+    brew outdated
+    echo "---------------------"
+}
+
 getLatestPackages() {
-    # docker system prune -f --volumes
     local skip_ansible=0
     for arg in "$@"; do
         [ "$arg" = "--skip-ansible" ] && skip_ansible=1
     done
 
     if isInternetAvailable; then
+        _updateAsdf &
+        _updateTldr &
+        _updateTmuxinator &
 
-        $HOME/.asdf/bin/asdf update &
-        tldr --update &
-        gem update tmuxinator &
-
-        PLUGINSD=$ZSH_CUSTOM/plugins
-
-        DIRECTORY=$PLUGINSD/git-open
-        getLatestFromGit $DIRECTORY "https://github.com/paulirish/git-open.git"
-
-        DIRECTORY=$PLUGINSD/zsh-autosuggestions
-        getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-autosuggestions"
-
-        DIRECTORY=$PLUGINSD/zsh-syntax-highlighting
-        getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-syntax-highlighting"
-
-        DIRECTORY=$PLUGINSD/zsh-autocomplete
-        getLatestFromGit $DIRECTORY https://github.com/marlonrichert/zsh-autocomplete.git
-        # source $DIRECTORY/zsh-autocomplete.plugin.zsh
-
-        DIRECTORY=$PLUGINSD/zsh-completions
-        getLatestFromGit $DIRECTORY "https://github.com/zsh-users/zsh-completions"
-        fpath+=$DIRECTORY/src
-
-        THEMESD=$HOME/.oh-my-zsh/custom/themes
-        DIRECTORY=$THEMESD/powerlevel10k
-        getLatestFromGit $DIRECTORY "https://github.com/romkatv/powerlevel10k.git"
-
-        # python3 -m pip install --upgrade pip &
-
-        if command -v kubectl >/dev/null 2>&1
-        then
-            kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
-        fi
-
-        if command -v switch >/dev/null 2>&1
-        then
-            switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
-        fi
-        
-        if command -v brew >/dev/null 2>&1
-        then
-            ( cd $DOTFILES/go-scripts && brew outdated --json | go run ./script.go | xargs brew upgrade )
-
-            echo "----Brew Outdated----"
-            brew outdated
-            echo "---------------------"
-        fi
+        _updatePluginRepos
+        _updateKubectlCompletion
+        _updateSwitchCompletion
+        _updateBrew
 
         if [ $skip_ansible -eq 0 ]; then
             ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 $DOTFILES/ansible/git_setup.yaml
         fi
+    else
+        echo "No internet available, skipping getLatestPackages"
     fi
 
     wait
