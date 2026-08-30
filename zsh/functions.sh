@@ -7,8 +7,7 @@ getLatestPackages() {
         [ "$arg" = "--skip-ansible" ] && skip_ansible=1
     done
 
-    func_result="$(isInternetAvailable)"
-        if [ $func_result -eq 1 ]; then
+    if isInternetAvailable; then
 
         $HOME/.asdf/bin/asdf update &
         tldr --update &
@@ -68,36 +67,26 @@ getLatestPackages() {
 
 isInternetAvailable() {
     ping -q -c1 google.com &>/dev/null
-    if [ $? -eq 0 ]; then
-        echo "1"
-    else
-        echo "0"
-    fi
 }
 
 isTmuxSession() {
-    if [ "$TERM_PROGRAM" != "tmux" ]; then
-        echo "0"
-    else
-        echo "1"
-    fi
+    [ "$TERM_PROGRAM" = "tmux" ]
 }
 
+# Assumes the caller has already confirmed internet availability
+# (see getLatestPackages), so this doesn't re-ping per invocation.
 getLatestFromGit() {
-    func_result="$(isInternetAvailable)"
-    if [ $func_result -eq 1 ]; then
-        if [ ! -d "$1" ]; then
-            echo "-------GIT Clone------"
-            echo $2
-            git clone --depth 1 $2 $1
-        else
-            echo "-------GIT Pull-------"
-            echo $2
-            git -C $1 pull
-        fi
-
-        echo "----------------------"
+    if [ ! -d "$1" ]; then
+        echo "-------GIT Clone------"
+        echo $2
+        git clone --depth 1 $2 $1
+    else
+        echo "-------GIT Pull-------"
+        echo $2
+        git -C $1 pull
     fi
+
+    echo "----------------------"
 }
 
 dockerCleanContainers(){
@@ -147,7 +136,8 @@ watchK8Pods() {
 }
 
 setupK8Proxy(){
-    kubectl proxy --port $((port + 1)) --api-prefix=/api/v1/namespaces/
+    local port="${1:-8000}"
+    kubectl proxy --port "$((port + 1))" --api-prefix=/api/v1/namespaces/
     # open http://localhost:8001/api/v1/namespaces/argocd/services/https:argocd-server:443/proxy/
 }
 
@@ -166,7 +156,7 @@ weather() {
 }
 
 testInternet(){
-    watch -n 1 start=$SECONDS
+    local start=$SECONDS
     echo "Response Code from https://www.google.com"
     curl -w "%{http_code}" -o /dev/null -s https://www.google.com
     echo "Seconds:"
@@ -382,7 +372,7 @@ function dockerRun(){
     if [ -n "$2" ]; then
         image="$DOCKER_DEFAULT_REGISTRY_ADDRESS/$2"
         docker run --rm -it --entrypoint $1 --network=host $image
-    elif [ -n "$1"]; then
+    elif [ -n "$1" ]; then
         docker run --rm -it --network=host $(basename "$PWD"):latest-local $1
     elif [ -n "$DOCKER_IMAGE" ]; then
         docker run --rm -it --network=host $DOCKER_IMAGE
