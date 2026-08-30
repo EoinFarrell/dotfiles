@@ -70,6 +70,8 @@
   - name: Find all custom zsh files
     find:
       paths: ~/Code/personal/dotfiles/zsh/oh-my-zsh
+      patterns: '*.zsh'
+      file_type: file
     register: find
   - name: ~/.oh-my-zsh/custom
     file:

@@ -163,24 +163,6 @@ testInternet(){
     echo $(( SECONDS - start ))
 }
 
-# todo(){
-#     source $DOTFILES/zsh/scripts/todo.sh $1 todo $2 $3 $4
-
-#     # if ! [ -z "$1" ]; then
-#     #     echo "- ${1}" >> $NOTES/TODO.md
-#     # else
-#     #     mdcat $NOTES/TODO.md
-#     # fi
-# }
-
-# todoDemo(){
-#     source $DOTFILES/zsh/scripts/todo.sh $1 demo $2
-# }
-
-# cpConsts() {
-#     source $DOTFILES/zsh/scripts/copy/copy.sh $1 $2 $3
-# }
-
 codec(){
     cd $1 && code .
 }
