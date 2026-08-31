@@ -94,8 +94,8 @@ export PATH="$HOME/Library/Python/3.9/bin:$PATH"
 alias mux=tmuxinator
 
 # Added by Toolbox App
-if [ -z "~/Library/Application Support/JetBrains/Toolbox/scripts" ]; then
-    export PATH="$PATH:/Users/eoin.farrell/Library/Application Support/JetBrains/Toolbox/scripts"
+if [ -z "/Users/eoin.farrell/Applications/JetBrains/Toolbox/scripts" ]; then
+    export PATH="$PATH:/Users/eoin.farrell/Applications/JetBrains/Toolbox/scripts"
 fi
 
 # GIT
@@ -124,6 +124,10 @@ git-clean() {
     fi
 }
 
+export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
+export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
+export PATH=${PATH/\/Users\/feoin\/.nix-profile\/bin:}
+export PATH=${PATH/\/nix\/var\/nix\/profiles\/default\/bin:}
 export PATH=${PATH/\/Users\/eoinfarrell\/Library\/Application Support\/JetBrains\/Toolbox\/scripts:}
 export PATH=${PATH/\/Users\/eoinfarrell\/Library\/Application Support\/JetBrains\/Toolbox\/scripts}
 export PATH=${PATH/\/var\/run\/com.apple.security.cryptexd\/codex.system\/bootstrap\/usr\/local\/bin:}
