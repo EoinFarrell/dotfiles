@@ -224,19 +224,25 @@ tm(){
 # }
 
 function tmuxHPercent(){
-    height="$(tmux list-windows -F "#{window_height}" | head -n1)"
+    # Resolve the window this pane's shell is actually running in, rather than
+    # relying on tmux's default "current" target (the client's attached window),
+    # which is wrong when other panes are set up in a window you've switched away from.
+    window_target="$(tmux display-message -p -t "$TMUX_PANE" '#{session_name}:#{window_index}')"
+    height="$(tmux display-message -p -t "$window_target" '#{window_height}')"
     echo $height
     newHeight=$(echo "$height/100*$1" | bc -l | xargs printf %.0f)
     echo $newHeight
-    tmux resize-pane -y $newHeight -t $2
+    tmux resize-pane -y $newHeight -t "${window_target}.$2"
 }
 
 function tmuxVPercent(){
-    width="$(tmux list-windows -F "#{window_width}" | head -n1)"
+    # See tmuxHPercent for why we resolve the window explicitly via $TMUX_PANE.
+    window_target="$(tmux display-message -p -t "$TMUX_PANE" '#{session_name}:#{window_index}')"
+    width="$(tmux display-message -p -t "$window_target" '#{window_width}')"
     echo $width
     newWidth=$(echo "$width/100*$1" | bc -l | xargs printf %.0f)
     echo $newWidth
-    tmux resize-pane -x $newWidth -t $2
+    tmux resize-pane -x $newWidth -t "${window_target}.$2"
 }
 
 function tmuxUp(){
