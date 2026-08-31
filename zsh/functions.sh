@@ -48,10 +48,10 @@ getLatestPackages() {
             switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
         fi
         
-        if switch -v kubectl >/dev/null 2>&1
+        if command -v brew >/dev/null 2>&1
         then
-            cd $DOTFILES/go-scripts && brew outdated --json | go run ./script.go | xargs brew upgrade
-        
+            ( cd $DOTFILES/go-scripts && brew outdated --json | go run ./script.go | xargs brew upgrade )
+
             echo "----Brew Outdated----"
             brew outdated
             echo "---------------------"
@@ -63,6 +63,44 @@ getLatestPackages() {
     fi
 
     wait
+}
+
+# One command to fully update this machine: pull dotfiles, upgrade packages,
+# (re-)run the provisioning playbooks, and — on the work laptop — do the same for
+# the workday overlay. Runs the work half only when $DOTFILES_WD is present.
+updateMachine() {
+    if ! isInternetAvailable; then
+        echo "updateMachine: no internet, skipping." >&2
+        return 1
+    fi
+
+    # 1. Pull the dotfiles repos themselves so we provision from the latest source.
+    echo "==> Pulling dotfiles repos"
+    git -C "$DOTFILES" pull --ff-only
+    if [ -d "$DOTFILES_WD/.git" ]; then
+        git -C "$DOTFILES_WD" pull --ff-only
+    fi
+
+    # 2. Upgrade packages / plugins / runtimes (updateMachine owns the Ansible runs,
+    #    so skip the playbook inside getLatestPackages).
+    echo "==> Updating packages"
+    getLatestPackages --skip-ansible
+
+    # 3. Provision: base_setup installs newly-declared casks/formulae/fonts + asdf
+    #    runtimes; git_setup relinks dotfiles and clones repos.
+    echo "==> Provisioning (base_setup + git_setup)"
+    local base_playbook="base_setup.yaml"
+    [ "$(uname -s)" = "Linux" ] && base_playbook="base_setup_debian.yaml"
+    ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 "$DOTFILES/ansible/$base_playbook"
+    ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 "$DOTFILES/ansible/git_setup.yaml"
+
+    # 4. Work laptop only: workday tool repos, CLIs, and overlay playbook.
+    if [ -d "$DOTFILES_WD" ] && command -v getLatestPackagesWD >/dev/null 2>&1; then
+        echo "==> Updating workday overlay"
+        getLatestPackagesWD
+    fi
+
+    echo "==> updateMachine complete"
 }
 
 isInternetAvailable() {
