@@ -7,12 +7,14 @@ DOTFILES_WD=~/Code/workday/eoin-farrell/dotfiles
 WDDOTFILES=$DOTFILES_WD
 WdDOTFILESD=$DOTFILES_WD
 NOTES=~/Code/personal/notes.eoinfarrell.dev
+export PATH="$NOTES/bin:$PATH"
 HOMELAB=~/Code/personal/homelab.eoinfarrell.dev
 AWS_CONFIG=~/.aws
 KUBE_CONFIG=~/.kube
 SSH_CONFIG=~/.ssh
 export SOPS_CONFIG=~/.config/sops/sops.yaml
 export EDITOR=hx
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 # Source functions needed by startup scripts
 source ~/Code/personal/dotfiles/zsh/startup/validation.sh
