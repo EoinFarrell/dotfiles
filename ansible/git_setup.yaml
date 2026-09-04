@@ -172,11 +172,3 @@
     ansible.builtin.shell:
       cmd: ~/.oh-my-zsh/custom/themes/powerlevel10k/gitstatus/install
       creates: ~/.oh-my-zsh/custom/themes/powerlevel10k/gitstatus/usrbin/gitstatusd-darwin-arm64
-  - name: Get latest
-    shell: |
-      export DOTFILES=~/Code/personal/dotfiles
-      export ZSH_CUSTOM=~/.oh-my-zsh/custom
-      source $DOTFILES/zsh/functions.sh
-      getLatestPackages --skip-ansible
-    args:
-      executable: /bin/zsh

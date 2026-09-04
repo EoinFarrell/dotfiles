@@ -10,10 +10,14 @@
 #                      ~/.claude/skills) — never for a shared directory
 #                      like $HOME, where it would delete unrelated symlinks.
 - name: Create dirs for symbolic links
+  # No `recurse: yes` here: state=directory already creates missing
+  # intermediate dirs (mkdir -p) without it. recurse is only needed to
+  # cascade owner/mode onto existing subdirs, which we never set — and
+  # link_dirs can include $HOME itself, where recursing walked into a
+  # Google Drive "Shared drives" mount and blew Python's recursion limit.
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    recurse: yes
   loop: "{{ link_dirs }}"
 
 - name: Remove existing dotfiles before relinking

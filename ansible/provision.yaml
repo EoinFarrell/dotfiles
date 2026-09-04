@@ -19,6 +19,13 @@
   gather_facts: yes
   vars_files:
     - vars/homebrew_packages.yml
+  vars:
+    # Tasks that install apps requiring an interactive sudo prompt fail
+    # outright under MDM policies that disallow non-interactive admin auth
+    # (e.g. localsend's cask copy to /Applications). Off by default so a
+    # normal run doesn't die partway through; opt in with
+    # `-e mdm_gated_tasks=true` on a machine where it's actually allowed.
+    mdm_gated_tasks: false
   tasks:
     - name: Install Oh My Zsh
       ansible.builtin.include_tasks: tasks/oh_my_zsh.yaml

@@ -56,15 +56,24 @@
 # shared vars/homebrew_packages.yml list, since it's a GUI send/receive
 # app with no meaningful Linux install path here (same reasoning as the
 # casks above).
+#
+# localsend's cask install copies to /Applications via an internal sudo
+# call that Homebrew shells out to itself — separate from Ansible's own
+# become — so it prompts interactively and fails outright under MDM
+# policies that block non-interactive admin auth. Gated behind
+# mdm_gated_tasks (default false); run with `-e mdm_gated_tasks=true` on
+# a machine where interactive sudo during provisioning is allowed.
 - name: Tap Homebrew repositorys
   community.general.homebrew_tap:
     name: "{{ item }}"
     state: present
   environment:
     HOMEBREW_NO_AUTO_UPDATE: "1"
+    HOMEBREW_NO_REQUIRE_TAP_TRUST: "1"
   loop:
     - localsend/localsend
     # - sachaos/todoist
+  when: mdm_gated_tasks
 
 - name: Install Tap Packages
   community.general.homebrew:
@@ -72,9 +81,11 @@
     state: present
   environment:
     HOMEBREW_NO_AUTO_UPDATE: "1"
+    HOMEBREW_NO_REQUIRE_TAP_TRUST: "1"
   loop:
     - localsend
     # - todoist
+  when: mdm_gated_tasks
 
 - name: Find all custom fonts
   ansible.builtin.find:
