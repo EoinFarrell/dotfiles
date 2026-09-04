@@ -3,10 +3,16 @@
 # See docs/adr/0001-homebrew-for-user-cli-tools.md for the reasoning.
 #
 # OS-level packages (daemons, kernel modules, drivers) do NOT belong here —
-# they stay in the OS-specific apt tasks in base_setup_debian.yaml, or in
-# the macOS casks/Rosetta tasks in base_setup.yaml.
+# they stay in the OS-specific apt tasks in ansible/tasks/debian.yaml, or
+# in the macOS casks/Rosetta tasks in ansible/tasks/macos.yaml.
 homebrew_packages:
   - ansible
+  # asdf itself (the runtime-version manager) — not a language runtime, so
+  # it belongs here rather than under docs/adr/0002-asdf-for-language-runtimes.md's
+  # asdf/.tool-versions. Modern asdf (0.16+) ships as a standalone binary,
+  # not the old git-cloned shell-script install tasks/asdf_tool_versions.yaml
+  # used to assume — see that file's history for what broke.
+  - asdf
   - awscli
   - bat
   - coreutils

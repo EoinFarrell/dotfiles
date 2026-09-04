@@ -1,24 +1,21 @@
-# Shared asdf setup used by base_setup.yaml and base_setup_debian.yaml.
+# Shared asdf setup used by provision.yaml on both macOS and Debian.
 # Installs the asdf plugin and pinned version for every line in
 # asdf/.tool-versions — that file is the single source of truth, so a new
 # runtime only needs adding there, not to this task.
-- name: Setup asdf vm dirs
-  ansible.builtin.file:
-    path: ~/.asdf
-    state: directory
-    recurse: yes
-
-- name: Clone asdfvm
-  ansible.builtin.git:
-    repo: 'https://github.com/asdf-vm/asdf.git'
-    dest: ~/.asdf
-
+#
+# asdf itself is installed via Homebrew (vars/homebrew_packages.yml, which
+# runs before this task in provision.yaml) rather than here. Older asdf
+# (pre-0.16) shipped as a shell-script repo you `git clone`d to ~/.asdf;
+# this task used to do exactly that. Modern asdf is a standalone binary,
+# and ~/.asdf is now purely its data dir (plugins/shims/installs), created
+# lazily on first use — running that git clone against an existing,
+# populated, non-git ~/.asdf just fails outright ("destination path
+# '~/.asdf' already exists and is not an empty directory").
 - name: Install asdf plugins and versions pinned in tool-versions
   # No `asdf global`/`asdf set -u` step needed: git_setup.yaml symlinks this
   # same file to ~/.tool-versions, so asdf already resolves these versions
   # as the global default once installed.
   ansible.builtin.shell: |
-    export PATH="${HOME}/.asdf/bin:${PATH}"
     while read -r name version _; do
       [ -z "$name" ] && continue
       case "$name" in \#*) continue ;; esac
