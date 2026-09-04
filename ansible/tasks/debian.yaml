@@ -19,6 +19,12 @@
     state: directory
     mode: '0755'
 
+# Every apt_repository task below sets update_cache: false — its default
+# (true) runs a full `apt-get update` on every single invocation, so with
+# 4 repos that's up to 4 redundant cache refreshes on every provision run,
+# even when nothing changed. "Update and upgrade apt packages" below does
+# the one combined refresh we actually need (and skips it entirely within
+# cache_valid_time), so new repos added here are still picked up by it.
 - name: Docker Apt
   block:
     - name: Check that docker key exists
@@ -37,6 +43,7 @@
       ansible.builtin.apt_repository:
         repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian/ {{ ansible_distribution_release }} stable"
         state: present
+        update_cache: false
       become: true
 
 - name: Terraform Apt
@@ -57,6 +64,7 @@
       ansible.builtin.apt_repository:
         repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/terraform.asc] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
         state: present
+        update_cache: false
       become: true
 
 - name: Tailscale Apt
@@ -78,6 +86,7 @@
       ansible.builtin.apt_repository:
         repo: "deb [signed-by=/etc/apt/keyrings/tailscale.gpg] https://pkgs.tailscale.com/stable/debian {{ ansible_distribution_release }} main"
         state: present
+        update_cache: false
       become: true
 
 - name: Debian Contrib & Non-Free (steam)
@@ -86,6 +95,7 @@
       ansible.builtin.apt_repository:
         repo: "deb http://deb.debian.org/debian/ {{ ansible_distribution_release }} contrib non-free"
         state: present
+        update_cache: false
       become: true
 
 ### Install Packages ###
