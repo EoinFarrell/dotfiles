@@ -5,15 +5,6 @@
   community.general.homebrew:
     update_homebrew: true
 
-- name: Remove Casks
-  community.general.homebrew:
-    name: "homebrew/cask/{{ item }}"
-    state: absent
-  loop:
-    - obsidian
-  environment:
-    HOMEBREW_NO_AUTO_UPDATE: "1"
-
 - name: Install Casks
   community.general.homebrew:
     name: "homebrew/cask/{{ item }}"
