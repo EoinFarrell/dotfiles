@@ -11,33 +11,50 @@
       - dotfiles
       - notes.eoinfarrell.dev
 
-    link_dirs:
-      - ~/.config/superfile
-      - ~/.config/bat
-      - ~/.config/ghostty
-
     # List of maps for creating symlinks (src -> dest). Named
     # personal_dotfile_links (not dotfile_links) so provision.yaml can
     # reuse this same var name once the work overlay's equivalent
     # (workday_dotfile_links) is wired in alongside it (Phase 3c).
-    personal_dotfile_links:
-      - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
-      - { src: '~/Code/personal/dotfiles/zsh/zprofile' , dest: '~/.zprofile'}
-      - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
-      - { src: '~/Code/personal/dotfiles/git/.gitconfig' , dest: '~/.gitconfig'}
-      - { src: '~/Code/personal/dotfiles/tmux/.tmux.conf' , dest: '~/.tmux.conf'}
-      - { src: '~/Code/personal/dotfiles/tig/.tigrc' , dest: '~/.tigrc'}
-      - { src: '~/Code/personal/dotfiles/vim/.vimrc' , dest: '~/.vimrc'}
-      - { src: '~/Code/personal/dotfiles/asdf/.asdfrc' , dest: '~/.asdfrc'}
-      - { src: '~/Code/personal/dotfiles/asdf/.tool-versions' , dest: '~/.tool-versions'}
-      - { src: '~/Code/personal/dotfiles/superfile/hotkeys.toml' , dest: '~/.config/superfile/hotkeys.toml'}
-      - { src: '~/Code/personal/dotfiles/bat/config' , dest: '~/.config/bat/config'}
-      - { src: '~/Code/personal/dotfiles/ansible/ansible.cfg' , dest: '~/.ansible.cfg'}
-      - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/Library/Application Support/com.mitchellh.ghostty/config'}
-      - { src: '~/Code/personal/dotfiles/ghostty/config' , dest: '~/.config/ghostty/config'}
-      - { src: '~/Code/personal/dotfiles/lazygit/config.yml' , dest: '~/Library/Application Support/lazygit/config.yml'}
-      - { src: '~/Code/personal/dotfiles/helix/config.toml', dest: '~/.config/helix/config.toml'}
-      - { src: '~/Code/personal/dotfiles/sops/sops.yaml' , dest: '~/.config/sops/sops.yaml'}
+    #
+    # ghostty and lazygit are macOS-only-vs-Linux-XDG splits: on macOS they
+    # read ~/Library/Application Support/...; on Linux (Homebrew/Linuxbrew
+    # builds of both) they read the XDG ~/.config/... path. Unconditionally
+    # listing the macOS path broke on Linux — its parent dir never exists
+    # there (nothing creates ~/Library on Linux) — so it's now only added
+    # for ansible_facts['os_family'] == 'Darwin'.
+    personal_dotfile_links: >-
+      {{
+        [
+          { 'src': '~/Code/personal/dotfiles/zsh/zshrc' , 'dest': '~/.zshrc'},
+          { 'src': '~/Code/personal/dotfiles/zsh/zprofile' , 'dest': '~/.zprofile'},
+          { 'src': '~/Code/personal/dotfiles/git/.gitignore' , 'dest': '~/.gitignore'},
+          { 'src': '~/Code/personal/dotfiles/git/.gitconfig' , 'dest': '~/.gitconfig'},
+          { 'src': '~/Code/personal/dotfiles/tmux/.tmux.conf' , 'dest': '~/.tmux.conf'},
+          { 'src': '~/Code/personal/dotfiles/tig/.tigrc' , 'dest': '~/.tigrc'},
+          { 'src': '~/Code/personal/dotfiles/vim/.vimrc' , 'dest': '~/.vimrc'},
+          { 'src': '~/Code/personal/dotfiles/asdf/.asdfrc' , 'dest': '~/.asdfrc'},
+          { 'src': '~/Code/personal/dotfiles/asdf/.tool-versions' , 'dest': '~/.tool-versions'},
+          { 'src': '~/Code/personal/dotfiles/superfile/hotkeys.toml' , 'dest': '~/.config/superfile/hotkeys.toml'},
+          { 'src': '~/Code/personal/dotfiles/bat/config' , 'dest': '~/.config/bat/config'},
+          { 'src': '~/Code/personal/dotfiles/ansible/ansible.cfg' , 'dest': '~/.ansible.cfg'},
+          { 'src': '~/Code/personal/dotfiles/ghostty/config' , 'dest': '~/.config/ghostty/config'},
+          { 'src': '~/Code/personal/dotfiles/lazygit/config.yml' , 'dest': '~/.config/lazygit/config.yml'},
+          { 'src': '~/Code/personal/dotfiles/helix/config.toml', 'dest': '~/.config/helix/config.toml'},
+          { 'src': '~/Code/personal/dotfiles/sops/sops.yaml' , 'dest': '~/.config/sops/sops.yaml'},
+        ] + (
+          [
+            { 'src': '~/Code/personal/dotfiles/ghostty/config' , 'dest': '~/Library/Application Support/com.mitchellh.ghostty/config'},
+            { 'src': '~/Code/personal/dotfiles/lazygit/config.yml' , 'dest': '~/Library/Application Support/lazygit/config.yml'},
+          ] if ansible_facts['os_family'] == 'Darwin' else []
+        )
+      }}
+
+    # Derived from personal_dotfile_links' dest paths rather than
+    # hand-maintained: every dest's parent dir needs to exist before
+    # tasks/link_dotfiles.yaml can create the symlink there, and keeping a
+    # separate hand-written list is exactly how the ~/Library/Application
+    # Support/... dirs above went uncreated for so long.
+    link_dirs: "{{ personal_dotfile_links | map(attribute='dest') | map('dirname') | unique | list }}"
 
     # Placeholder for files to remove before creating links (maps with src/dest)
     remove_dotfiles: []
