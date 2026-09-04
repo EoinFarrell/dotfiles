@@ -7,6 +7,12 @@
 # git_setup.yaml runs as a second play via import_playbook below, so one
 # `ansible-playbook provision.yaml` invocation does both — while
 # git_setup.yaml itself stays runnable standalone for a quick relink.
+#
+# Running for real (not --check) with -K: run `sudo -v` first to cache a
+# sudo timestamp. Otherwise a become-gated task partway through this long
+# a run can hang indefinitely with sudo just sitting there waiting on
+# stdin for the -K password to be relayed — a delivery quirk, not a slow
+# task — rather than actually prompting or failing.
 - name: "Provision"
   hosts: 127.0.0.1
   connection: local
