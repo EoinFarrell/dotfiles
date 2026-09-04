@@ -1,0 +1,215 @@
+# Debian-specific setup, included by provision.yaml when
+# ansible_os_family == 'Debian'. Bootstraps Linuxbrew (macOS ships with
+# Homebrew already installed manually, so tasks/macos.yaml has no
+# equivalent step).
+- name: Create Tmp dir
+  ansible.builtin.file:
+    path: ~/tmp
+    state: directory
+
+### Add Repos ###
+
+- name: Get DEB architecture
+  ansible.builtin.shell: dpkg --print-architecture
+  register: deb_architecture
+
+- name: Setup Keyring
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+# Every apt_repository task below sets update_cache: false — its default
+# (true) runs a full `apt-get update` on every single invocation, so with
+# 4 repos that's up to 4 redundant cache refreshes on every provision run,
+# even when nothing changed. "Update and upgrade apt packages" below does
+# the one combined refresh we actually need (and skips it entirely within
+# cache_valid_time), so new repos added here are still picked up by it.
+- name: Docker Apt
+  block:
+    - name: Check that docker key exists
+      ansible.builtin.stat:
+        path: /etc/apt/keyrings/docker.asc
+      register: docker_key_stat_result
+
+    - name: Add docker apt key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+      when: not docker_key_stat_result.stat.exists
+      become: true
+
+    - name: Add docker apt repo
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian/ {{ ansible_distribution_release }} stable"
+        state: present
+        update_cache: false
+      become: true
+
+- name: Terraform Apt
+  block:
+    - name: Check that Terraform key exists
+      ansible.builtin.stat:
+        path: /etc/apt/keyrings/terraform.asc
+      register: terraform_key_stat_result
+
+    - name: Add terraform apt key
+      ansible.builtin.get_url:
+        url: https://apt.releases.hashicorp.com/gpg
+        dest: /etc/apt/keyrings/terraform.asc
+      when: not terraform_key_stat_result.stat.exists
+      become: true
+
+    - name: Add Terraform apt repo
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/terraform.asc] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: false
+      become: true
+
+- name: Tailscale Apt
+  block:
+    - name: Check that Tailscale key exists
+      ansible.builtin.stat:
+        path: /etc/apt/keyrings/tailscale.gpg
+      register: tailscale_key_stat_result
+
+    - name: Add tailscale apt key
+      ansible.builtin.get_url:
+        url: https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg
+        dest: /etc/apt/keyrings/tailscale.gpg
+        force: yes
+        mode: '0644'
+      become: true
+
+    - name: Add Tailscale apt repo
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/tailscale.gpg] https://pkgs.tailscale.com/stable/debian {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: false
+      become: true
+
+- name: Debian Contrib & Non-Free (steam)
+  block:
+    - name: Add Debian Contrib & Non-Free apt repo
+      ansible.builtin.apt_repository:
+        repo: "deb http://deb.debian.org/debian/ {{ ansible_distribution_release }} contrib non-free"
+        state: present
+        update_cache: false
+      become: true
+
+### Install Packages ###
+
+- name: Install aptitude
+  ansible.builtin.apt:
+    name: aptitude
+    state: latest
+    update_cache: false
+  become: true
+
+- name: Update and upgrade apt packages
+  ansible.builtin.apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400
+  become: true
+
+- name: Install base packages
+  ansible.builtin.apt:
+    pkg:
+      # OS-level packages and Linuxbrew's own system dependencies only.
+      # User/CLI tools live in vars/homebrew_packages.yml instead — see
+      # docs/adr/0001-homebrew-for-user-cli-tools.md.
+      - apt-transport-https
+      - build-essential
+      - ca-certificates
+      - curl
+      - file
+      - git # also needed to bootstrap Homebrew itself
+      - gpg
+      - gnupg
+      - nfs-common
+      - procps
+      # - ghossty
+      - software-properties-common
+      # - steam-installer
+      - tailscale
+      - terraform
+      # - openssh-server
+    state: latest
+    update_cache: false
+  become: true
+
+### Docker Install ###
+
+- name: Install Docker packages
+  ansible.builtin.apt:
+    pkg:
+      - gnupg-agent
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+  become: true
+
+- name: Ensure group "docker" exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+  become: true
+
+- name: Add current user to docker group
+  ansible.builtin.command: sudo usermod -aG docker $USER
+  become: true
+
+- name: Add feoin to docker group
+  ansible.builtin.command: sudo usermod -aG docker feoin
+  become: true
+
+### ZSH default shell ###
+# Oh My Zsh itself is installed by the shared tasks/oh_my_zsh.yaml; this
+# just makes zsh the login shell, which macOS doesn't need (zsh has been
+# the default there since Catalina).
+
+- name: Set zsh as default shell for feoin
+  ansible.builtin.user:
+    name: feoin
+    shell: /bin/zsh
+  become: true
+
+- name: Make Zsh default shell
+  ansible.builtin.command: chsh -s /bin/zsh
+  become: true
+
+### Linuxbrew ###
+
+- name: Check that /home/linuxbrew exists
+  ansible.builtin.stat:
+    path: /home/linuxbrew/.linuxbrew
+  register: linuxbrew_stat_result
+  become: true
+
+- name: Download Linuxbrew installer
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+    dest: ~/tmp/linuxbrew-installer.sh
+    mode: '0755'
+  when: not linuxbrew_stat_result.stat.exists
+
+- name: Execute the Linuxbrew-installer.sh
+  ansible.builtin.shell: ~/tmp/linuxbrew-installer.sh
+  when: not linuxbrew_stat_result.stat.exists
+  become: true
+
+- name: Remove the Linuxbrew-installer.sh
+  ansible.builtin.file:
+    path: ~/tmp/linuxbrew-installer.sh
+    state: absent
+  when: not linuxbrew_stat_result.stat.exists
+
+# Finalizer (reboot-required check + autoremove) is deliberately NOT here:
+# in the original base_setup_debian.yaml it ran after the shared Homebrew
+# packages/asdf steps, which are top-level tasks in provision.yaml that run
+# after this file's include completes. It lives in tasks/debian_finalize.yaml
+# instead, included at the end of provision.yaml, to preserve that order.

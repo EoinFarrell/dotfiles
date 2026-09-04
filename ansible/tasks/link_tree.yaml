@@ -1,0 +1,46 @@
+# Symlinks every file under src_root into dest_root, mirroring relative
+# subdirectory structure (so it also covers the flat case: a src_root with
+# no subdirectories just lands as basename-only symlinks in dest_root).
+# Parameters (set via `vars:` on the include_tasks call):
+#   src_root  - directory to scan (recursively)
+#   dest_root - directory to create the mirrored symlinks under
+#   patterns  - (optional) `find` patterns filter, e.g. '*.zsh'
+#
+# src_root/dest_root MUST be absolute paths, not `~/...` — `find`'s
+# registered results are always absolute, and the regex_replace below does
+# a plain string-prefix swap against them. Use "{{ ansible_env.HOME }}/..."
+# rather than "~/..." when calling this.
+- name: "Find files under {{ src_root }}"
+  ansible.builtin.find:
+    paths: "{{ src_root }}"
+    patterns: "{{ patterns | default(omit) }}"
+    recurse: yes
+    file_type: file
+  register: _link_tree_found
+
+# Guarded on matched > 0 throughout: src_root not existing, or existing but
+# empty, is a real (if unusual) case for some callers — mirrors the
+# original find+with_items loops, which quietly did nothing rather than
+# creating an empty dest_root.
+- name: "Ensure {{ dest_root }} exists"
+  ansible.builtin.file:
+    path: "{{ dest_root }}"
+    state: directory
+    recurse: yes
+  when: _link_tree_found.matched > 0
+
+- name: "Create dirs for nested files under {{ dest_root }}"
+  ansible.builtin.file:
+    path: "{{ (item.path | regex_replace('^' ~ src_root ~ '/', dest_root ~ '/')) | dirname }}"
+    state: directory
+    recurse: yes
+  loop: "{{ _link_tree_found.files }}"
+  when: _link_tree_found.matched > 0
+
+- name: "Symlink files into {{ dest_root }}"
+  ansible.builtin.file:
+    src: "{{ item.path }}"
+    dest: "{{ item.path | regex_replace('^' ~ src_root ~ '/', dest_root ~ '/') }}"
+    state: link
+  loop: "{{ _link_tree_found.files }}"
+  when: _link_tree_found.matched > 0

@@ -59,7 +59,7 @@ Also fix the CLAUDE.md line that claims the old command git-pulls, and update it
 
 Two dotfiles repos manage the full machine setup:
 
-- **Personal** — `~/Code/personal/dotfiles` (`$DOTFILES`). Used on **multiple** personal machines (macOS + a Debian box `nr200p`). It is the bootstrap root: its `zsh/startup/init.sh` sets `$DOTFILES_WD` and sources the work repo.
+- **Personal** — `~/Code/personal/dotfiles` (`$DOTFILES`). Used on **multiple** personal machines (a macOS laptop, plus two Debian boxes — desktop `nr200p` and laptop `t480`). It is the bootstrap root: its `zsh/startup/init.sh` sets `$DOTFILES_WD` and sources the work repo.
 - **Work** — `~/Code/workday/eoin-farrell/dotfiles` (`$DOTFILES_WD`). Used **only on this work laptop** (and future laptop upgrades). It is a *satellite* — it cannot bootstrap standalone and relies on the personal repo for `_sops_decrypt_if_changed`, `getLatestFromGit`, `sops-watch.sh`, and for being sourced at all.
 
 The two repos have drifted. The work repo hardcodes `/Users/eoin.farrell/...` absolute paths in several places (so it won't survive a laptop upgrade with a different username, and even the current user is fragile), duplicates structure without sharing conventions, and lacks the personal repo's documentation scaffolding. The goal of this change is to make the two repos **structurally consistent** and the work repo **portable to a future laptop** — while respecting that the personal repo is the parent and the work repo is a thin, sourced overlay.
@@ -149,10 +149,10 @@ Concretely:
 ### Sequencing / risk
 
 This is the largest phase and touches provisioning, so stage it:
-- **3a** — extract shared includes (`tasks/macos.yaml`, `tasks/debian.yaml`, `tasks/oh_my_zsh.yaml`) and add `provision.yaml` that reproduces today's behaviour; keep old playbooks until proven. Verify with `--check --diff` on this Mac (empty diff = equivalent).
-- **3b** — introduce `tasks/link_dotfiles.yaml` + `tasks/link_tree.yaml`, migrate personal `git_setup` links, then the workday `setup.yaml` links (variabilised). `--check --diff` must show identical symlink targets.
-- **3c** — switch `updateMachine` to the single `provision.yaml` call; run for real on this machine and confirm symlinks/packages unchanged. Retire superseded playbooks.
-- Debian path (`tasks/debian.yaml`) can only be fully verified on `nr200p` — until then rely on `--check` and keep `base_setup_debian.yaml` as a fallback.
+- **3a** — extract shared includes (`tasks/macos.yaml`, `tasks/debian.yaml`, `tasks/oh_my_zsh.yaml`) and add `provision.yaml` that reproduces today's behaviour; keep old playbooks until proven. Verify with `--check --diff` on this Mac (empty diff = equivalent). ✅ Done — verified via `--check --diff` on both t480 (Debian) and the Mac; caught and fixed a real finalizer-ordering bug in the process.
+- **3b** — introduce `tasks/link_dotfiles.yaml` + `tasks/link_tree.yaml`, migrate personal `git_setup` links, then the workday `setup.yaml` links (variabilised). `--check --diff` must show identical symlink targets. ✅ Personal side done, incl. folding in `claude.yaml`/`tldr_setup.yaml` (both still wanted) and restoring the deleted `tmuxinator/` dir. ⏳ Workday `setup.yaml` side blocked on work-repo access (like Phase 1).
+- **3c** — switch `updateMachine` to the single `provision.yaml` call; run for real on this machine and confirm symlinks/packages unchanged. Retire superseded playbooks. ✅ `updateMachine` now calls `provision.yaml` alone (`git_setup.yaml` runs as its second play via `import_playbook`, and stays runnable standalone). `base_setup.yaml`/`base_setup_debian.yaml` deleted.
+- Debian path (`tasks/debian.yaml`) can only be fully verified on a Debian box (`nr200p` or `t480`) — until then rely on `--check` and keep `base_setup_debian.yaml` as a fallback. Superseded by the 3a/3c verification above.
 
 ## Phase 4 — Consistency: config-file naming & shared shell files
 

@@ -1,5 +1,7 @@
 ---
-# ansible-playbook -i inventory.ini git_setup.yaml
+# ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 git_setup.yaml
+# Also runs as provision.yaml's second play (via import_playbook) — this
+# header is for the standalone-relink case.
 - name: "Git Setup"
   hosts: 127.0.0.1
   connection: local
@@ -14,8 +16,11 @@
       - ~/.config/bat
       - ~/.config/ghostty
 
-    # List of maps for creating symlinks (src -> dest)
-    dotfile_links:
+    # List of maps for creating symlinks (src -> dest). Named
+    # personal_dotfile_links (not dotfile_links) so provision.yaml can
+    # reuse this same var name once the work overlay's equivalent
+    # (workday_dotfile_links) is wired in alongside it (Phase 3c).
+    personal_dotfile_links:
       - { src: '~/Code/personal/dotfiles/zsh/zshrc' , dest: '~/.zshrc'}
       - { src: '~/Code/personal/dotfiles/zsh/zprofile' , dest: '~/.zprofile'}
       - { src: '~/Code/personal/dotfiles/git/.gitignore' , dest: '~/.gitignore'}
@@ -36,6 +41,46 @@
 
     # Placeholder for files to remove before creating links (maps with src/dest)
     remove_dotfiles: []
+
+    # Folded in from the formerly-orphaned claude.yaml (Phase 3b): Claude/
+    # agent skill repos to clone and symlink into both harnesses' skill dirs.
+    claude_skill_repos:
+      - name: mattpocock/skills
+        skills:
+          - skills/engineering/ask-matt
+          - skills/engineering/code-review
+          - skills/engineering/codebase-design
+          - skills/engineering/diagnosing-bugs
+          - skills/engineering/domain-modeling
+          - skills/engineering/grill-with-docs
+          - skills/engineering/implement
+          - skills/engineering/improve-codebase-architecture
+          - skills/engineering/prototype
+          - skills/engineering/research
+          - skills/engineering/resolving-merge-conflicts
+          - skills/engineering/setup-matt-pocock-skills
+          - skills/engineering/tdd
+          - skills/engineering/to-spec
+          - skills/engineering/to-tickets
+          - skills/engineering/triage
+          - skills/engineering/wayfinder
+          - skills/engineering/wizard
+          - skills/productivity/grill-me
+          - skills/productivity/grilling
+          - skills/productivity/handoff
+          - skills/productivity/teach
+          - skills/productivity/to-questionnaire
+          - skills/productivity/wait-what
+          - skills/productivity/writing-for-agents
+          - skills/in-progress/retro
+      - name: cursor/plugins
+        skills:
+          - pstack/skills/technical-writing
+          - pstack/skills/unslop
+
+    claude_link_dirs:
+      - ~/.claude/skills
+      - ~/.agents/skills
   tasks:
   - name: Setup Code dirs
     ansible.builtin.file:
@@ -48,47 +93,59 @@
       dest: ~/Code/personal/{{ item }}
       update: no
     loop: "{{ personal_repos }}"
-  - name: Create dirs for symbolic links
+  - name: Link personal dotfiles
+    ansible.builtin.include_tasks: tasks/link_dotfiles.yaml
+    vars:
+      links: "{{ personal_dotfile_links }}"
+  - name: Link oh-my-zsh custom scripts
+    ansible.builtin.include_tasks: tasks/link_tree.yaml
+    vars:
+      src_root: "{{ ansible_env.HOME }}/Code/personal/dotfiles/zsh/oh-my-zsh"
+      dest_root: "{{ ansible_env.HOME }}/.oh-my-zsh/custom"
+      patterns: '*.zsh'
+  - name: Link tmuxinator configs
+    ansible.builtin.include_tasks: tasks/link_tree.yaml
+    vars:
+      src_root: "{{ ansible_env.HOME }}/Code/personal/dotfiles/tmuxinator"
+      dest_root: "{{ ansible_env.HOME }}/.config/tmuxinator"
+  # Folded in from the formerly-orphaned tldr_setup.yaml (Phase 3b). tldr
+  # pages live under $DOTFILES/../notes.eoinfarrell.dev/tldr and are used
+  # on every machine, not just macOS — tealdeer's own default pages dir
+  # differs per OS (confirmed against docs.tealdeer.org and this machine),
+  # so dest_root is OS-conditional rather than a single hardcoded path.
+  - name: Link tldr custom pages
+    ansible.builtin.include_tasks: tasks/link_tree.yaml
+    vars:
+      src_root: "{{ ansible_env.HOME }}/Code/personal/notes.eoinfarrell.dev/tldr"
+      dest_root: >-
+        {{ (ansible_env.HOME ~ '/Library/Application Support/tealdeer/pages')
+           if ansible_facts['os_family'] == 'Darwin'
+           else (ansible_env.HOME ~ '/.local/share/tealdeer/pages') }}
+  # Folded in from the formerly-orphaned claude.yaml (Phase 3b). Uses
+  # prune_unmanaged since ~/.claude/skills and ~/.agents/skills exist only
+  # to hold these managed symlinks — unlike personal_dotfile_links' targets,
+  # which are scattered across $HOME and must never be broadly pruned.
+  - name: Setup Claude Code dirs
     ansible.builtin.file:
-      path: "{{ item }}"
+      path: ~/Code/claude
       state: directory
       recurse: yes
-    loop: "{{ link_dirs }}"
-  - name: Remove existing dotfiles
-    ansible.builtin.file:
-      path: "{{ item.dest }}"
-      state: absent
-    loop: "{{ dotfile_links }}"
-    ignore_errors: true
-  - name: Create a symbolic links
-    ansible.builtin.file:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-      state: link
-    loop: "{{ dotfile_links }}"
-    ignore_errors: true
-  - name: Find all custom zsh files
-    find:
-      paths: ~/Code/personal/dotfiles/zsh/oh-my-zsh
-      patterns: '*.zsh'
-      file_type: file
-    register: find
-  - name: ~/.oh-my-zsh/custom
-    file:
-      src: "{{ item.path }}"
-      path: "~/.oh-my-zsh/custom/{{ item.path | basename }}"
-      state: link
-    with_items: "{{ find.files }}"
-  - name: Find all custom Tmuxinator files
-    find:
-      paths: ~/Code/personal/dotfiles/tmuxinator
-    register: findTmuxinator
-  - name: ~/.config/tmuxinator
-    file:
-      src: "{{ item.path }}"
-      path: "~/.config/tmuxinator/{{ item.path | basename }}"
-      state: link
-    with_items: "{{ findTmuxinator.files }}"
+  - name: Clone Claude skill repos
+    ansible.builtin.git:
+      repo: "https://github.com/{{ item.name }}.git"
+      dest: ~/Code/claude/{{ item.name }}
+      update: no
+    loop: "{{ claude_skill_repos }}"
+  - name: Build claude_dotfile_links from claude_skill_repos
+    ansible.builtin.set_fact:
+      claude_dotfile_links: "{{ claude_dotfile_links | default([]) + [{'src': '~/Code/claude/' + item.0.name + '/' + item.1, 'dest': '~/.claude/skills/' + (item.1 | basename)}, {'src': '~/Code/claude/' + item.0.name + '/' + item.1, 'dest': '~/.agents/skills/' + (item.1 | basename)}] }}"
+    loop: "{{ claude_skill_repos | subelements('skills') }}"
+  - name: Link Claude skills
+    ansible.builtin.include_tasks: tasks/link_dotfiles.yaml
+    vars:
+      links: "{{ claude_dotfile_links }}"
+      link_dirs: "{{ claude_link_dirs }}"
+      prune_unmanaged: true
   - name: Clone fzf-tab plugin
     ansible.builtin.git:
       repo: "https://github.com/Aloxaf/fzf-tab.git"

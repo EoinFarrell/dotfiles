@@ -1,0 +1,44 @@
+---
+# ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 provision.yaml
+#
+# Single cross-platform entry point, superseding base_setup.yaml and
+# base_setup_debian.yaml. Fans out on ansible_os_family instead of the
+# `uname`-in-shell branch updateMachine used to pick a playbook name with.
+# git_setup.yaml runs as a second play via import_playbook below, so one
+# `ansible-playbook provision.yaml` invocation does both — while
+# git_setup.yaml itself stays runnable standalone for a quick relink.
+#
+# Running for real (not --check) with -K: run `sudo -v` first to cache a
+# sudo timestamp. Otherwise a become-gated task partway through this long
+# a run can hang indefinitely with sudo just sitting there waiting on
+# stdin for the -K password to be relayed — a delivery quirk, not a slow
+# task — rather than actually prompting or failing.
+- name: "Provision"
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: yes
+  vars_files:
+    - vars/homebrew_packages.yml
+  tasks:
+    - name: Install Oh My Zsh
+      ansible.builtin.include_tasks: tasks/oh_my_zsh.yaml
+
+    - name: macOS-specific setup
+      ansible.builtin.include_tasks: tasks/macos.yaml
+      when: ansible_facts['os_family'] == 'Darwin'
+
+    - name: Debian-specific setup
+      ansible.builtin.include_tasks: tasks/debian.yaml
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Install shared Homebrew packages
+      ansible.builtin.include_tasks: tasks/homebrew_packages.yaml
+
+    - name: Install asdf-managed language runtimes
+      ansible.builtin.include_tasks: tasks/asdf_tool_versions.yaml
+
+    - name: Debian finalizer (reboot check + autoremove)
+      ansible.builtin.include_tasks: tasks/debian_finalize.yaml
+      when: ansible_facts['os_family'] == 'Debian'
+
+- import_playbook: git_setup.yaml

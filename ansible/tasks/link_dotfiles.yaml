@@ -1,0 +1,52 @@
+# Generic dotfile symlink engine, included wherever a list of {src, dest}
+# links needs creating. Parameters (set via `vars:` on the include_tasks
+# call):
+#   links            - list of {src, dest} maps to symlink
+#   link_dirs        - list of directories to ensure exist before linking
+#   prune_unmanaged  - (optional, default false) also remove any existing
+#                      symlink under link_dirs whose basename isn't among
+#                      `links`' dest basenames. Only safe for directories
+#                      that *exclusively* hold managed links (e.g.
+#                      ~/.claude/skills) — never for a shared directory
+#                      like $HOME, where it would delete unrelated symlinks.
+- name: Create dirs for symbolic links
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+  loop: "{{ link_dirs }}"
+
+- name: Remove existing dotfiles before relinking
+  # Explicit remove-then-link rather than relying on `file: state: link`
+  # alone: it fails outright if a real file (not a symlink) already sits
+  # at dest, which is exactly the state a fresh install leaves behind
+  # (e.g. the Oh My Zsh installer writes a real ~/.zshrc).
+  ansible.builtin.file:
+    path: "{{ item.dest }}"
+    state: absent
+  loop: "{{ links }}"
+  ignore_errors: true
+
+- name: Create symbolic links
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  loop: "{{ links }}"
+  ignore_errors: true
+
+- name: Find existing symlinks in managed link dirs
+  ansible.builtin.find:
+    paths: "{{ link_dirs }}"
+    file_type: link
+  register: _link_dotfiles_existing
+  when: prune_unmanaged | default(false)
+
+- name: Remove unmanaged symlinks
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ _link_dotfiles_existing.files | default([]) }}"
+  when:
+    - prune_unmanaged | default(false)
+    - item.path | basename not in (links | map(attribute='dest') | map('basename') | list)

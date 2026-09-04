@@ -1,0 +1,19 @@
+# Debian finalizer, included by provision.yaml when ansible_os_family ==
+# 'Debian', after the shared Homebrew packages/asdf steps. Split out from
+# tasks/debian.yaml specifically to run last — in the original
+# base_setup_debian.yaml this ran after those shared steps, and folding it
+# into tasks/debian.yaml would have moved it ahead of them instead.
+- name: Check if a reboot is required.
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+    get_checksum: no
+  register: reboot_required_file
+
+- name: Reboot the server (if required).
+  ansible.builtin.reboot:
+  when: reboot_required_file.stat.exists == true
+
+- name: Remove dependencies that are no longer required.
+  ansible.builtin.apt:
+    autoremove: yes
+  become: true
