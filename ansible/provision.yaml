@@ -16,11 +16,11 @@
 
     - name: macOS-specific setup
       ansible.builtin.include_tasks: tasks/macos.yaml
-      when: ansible_os_family == 'Darwin'
+      when: ansible_facts['os_family'] == 'Darwin'
 
     - name: Debian-specific setup
       ansible.builtin.include_tasks: tasks/debian.yaml
-      when: ansible_os_family == 'Debian'
+      when: ansible_facts['os_family'] == 'Debian'
 
     - name: Install shared Homebrew packages
       ansible.builtin.include_tasks: tasks/homebrew_packages.yaml
@@ -30,4 +30,4 @@
 
     - name: Debian finalizer (reboot check + autoremove)
       ansible.builtin.include_tasks: tasks/debian_finalize.yaml
-      when: ansible_os_family == 'Debian'
+      when: ansible_facts['os_family'] == 'Debian'
