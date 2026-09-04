@@ -94,13 +94,65 @@ Representative files: `envStart/base.sh`, `ansible/setup.yaml`, `kubeswitch/swit
 - Grep both repos for `WDDOTFILES` / `WdDOTFILESD` and rewrite each use to `DOTFILES_WD` (`grep -rn 'WDDOTFILES\|WdDOTFILESD'` across `$DOTFILES` and `$DOTFILES_WD`). Expected hotspots: `zsh/workday-functions.sh`, `envStart/*`.
 - Export `DOTFILES`, `DOTFILES_WD`, `CODE`, `PERSONAL` (personal `init.sh` currently assigns several without `export`, so sub-shells/ansible `shell:` steps re-derive them — see `ansible/setup.yaml:136-139` which re-exports them by hand). Exporting once removes that duplication.
 
-## Phase 3 — Consistency: align the Ansible symlink approach
+## Phase 3 — Consistency: one cross-platform entry playbook with OS/host fan-out
 
-The personal repo uses a clean declarative `dotfile_links` list in `ansible/git_setup.yaml`; the work repo mixes a hardcoded static `loop` with `find`-based dynamic loops.
+### Why (findings from the Ansible review)
 
-- Refactor `ansible/setup.yaml` so its static symlinks use the **same declarative-list shape** as personal's `dotfile_links` (a `vars:`-level list of `{ src, dest }` built on `dotfiles_wd`). Keep the `find`-based dynamic loops (oh-my-zsh, tmuxinator, ai/skills) — those are legitimately dynamic — but factor the repeated "create nested dirs + link with `regex_replace`" trio (ai/skills, howdah/skills, howdah/rules — lines 78-133 are three near-identical copies) into a single reusable task-include parameterised by source root + dest root, mirroring personal's `tasks/` include pattern.
-- Fix the copy-paste comment header: `ansible/setup.yaml:2` and the personal `claude.yaml`/`git_setup.yaml` headers all mis-say the wrong playbook name.
-- Guard the external-repo assumptions (`~/Code/workday/tools/environments-ssh-config`, `~/Code/workday/mia/ai/howdah/...`): wrap those tasks so a missing checkout skips rather than fails (`stat` + `when`), making first-run on a fresh laptop non-fatal.
+There are 7 playbooks across the two repos. What they actually do:
+
+| Playbook | Target | Invoked by | Status |
+|---|---|---|---|
+| `base_setup.yaml` (personal) | macOS local | `updateMachine` (`uname`=Darwin branch) | active |
+| `base_setup_debian.yaml` (personal) | Debian local (nr200p) | `updateMachine` (`uname`=Linux branch) | active |
+| `git_setup.yaml` (personal) | local | `getLatestPackages` / `updateMachine` | active |
+| `setup.yaml` (workday) | macOS work laptop | `getLatestPackagesWD` | active |
+| `claude.yaml` (personal) | local | **no caller** (manual) | orphaned — best pattern in the repo |
+| `tldr_setup.yaml` (personal) | macOS local | **no caller** (manual) | stale/niche |
+| `nvidia_setup.yaml` (personal) | **nr200p over SSH** | manual `-Kk` | keep as-is (one-off GPU) |
+
+Key facts driving the design:
+- `updateMachine` currently branches on `uname -s` to pick `base_setup.yaml` vs `base_setup_debian.yaml`, then calls `git_setup.yaml` — **two playbook names selected in shell**. This is exactly the fan-out Ansible should own via `ansible_os_family`.
+- The two `base_setup*` playbooks **already share** their two most important steps — both `include_tasks: tasks/homebrew_packages.yaml` and `tasks/asdf_tool_versions.yaml`. Only the OS-specific halves differ (casks/colima/fonts/rosetta on macOS; apt-repos/docker-ce/linuxbrew on Debian). The Oh My Zsh install block is the *same intent* with a trivially-unifiable implementation.
+- `inventory.ini` is vestigial for daily use — every function passes `--inventory 127.0.0.1,` and runs locally. Only `nvidia_setup.yaml` uses the `nr200p` SSH host. So it stays solely for that one manual play.
+- The shared-include pattern (`tasks/*.yaml` + `vars/*.yml`, per ADR-0001/0002) is proven and can absorb the OS split and the symlink engine.
+
+### Target structure
+
+Introduce a single **`ansible/provision.yaml`** (`hosts: localhost`, `connection: local`, `gather_facts: yes`) that fans out — replacing the shell-side `uname` branch and the separate base playbooks:
+
+```
+provision.yaml
+  vars_files: vars/homebrew_packages.yml
+  tasks:
+    - include_tasks: tasks/oh_my_zsh.yaml            # unified (get_url on both OSes)
+    - include_tasks: tasks/macos.yaml   when: ansible_os_family == 'Darwin'
+    - include_tasks: tasks/debian.yaml  when: ansible_os_family == 'Debian'
+    - include_tasks: tasks/homebrew_packages.yaml    # shared (brew or linuxbrew)
+    - include_tasks: tasks/asdf_tool_versions.yaml   # shared
+    - include_tasks: tasks/link_dotfiles.yaml
+        vars: { links: "{{ personal_dotfile_links }}" }
+    - include_tasks: tasks/link_dotfiles.yaml        # work overlay, only on work laptop
+        vars: { links: "{{ workday_dotfile_links }}" }
+      when: dotfiles_wd_present | bool
+```
+
+Concretely:
+1. **Split the OS-specific halves out** of the two `base_setup*` playbooks into `tasks/macos.yaml` (casks, colima, localsend tap, fonts→`/Library/Fonts`, rosetta) and `tasks/debian.yaml` (apt keyrings/repos, apt packages, docker-ce, linuxbrew, reboot-if-needed, autoremove). Move the shared OMZ install into `tasks/oh_my_zsh.yaml`. The old `base_setup.yaml` / `base_setup_debian.yaml` become thin or are deleted once `provision.yaml` supersedes them.
+2. **One symlink engine** — `tasks/link_dotfiles.yaml`: the generic "remove-then-link" loop from `git_setup.yaml`, driven by a `links` var. Feed it `personal_dotfile_links` (from `git_setup.yaml`'s existing `dotfile_links`) and, on the work laptop, `workday_dotfile_links` (replacing the hand-written static loop in workday `setup.yaml`). OS-varying dests (ghostty/lazygit `~/Library/Application Support/...`, p10k `gitstatusd-darwin-arm64`) become OS-driven vars.
+3. **One `tasks/link_tree.yaml`** parameterised by `src_root` + `dest_root` to replace the **three near-identical** find→mkdir→`regex_replace`→symlink blocks in workday `setup.yaml` (ai/skills, howdah/skills, howdah/rules) and the oh-my-zsh/tmuxinator find loops.
+4. **Guard external-repo assumptions** (`~/Code/workday/tools/environments-ssh-config`, `~/Code/workday/mia/ai/howdah/...`) with `stat` + `when` so a fresh laptop without those checkouts skips rather than fails.
+5. **Wire in the orphans**: fold `tldr_setup.yaml` into the personal link step (or drop it if unused); either call `claude.yaml` from `provision.yaml` or merge its dynamic prune-aware link logic into `tasks/link_dotfiles.yaml` (it is the most robust pattern — reconciles/prunes stale links). Keep `nvidia_setup.yaml` standalone.
+6. **Variabilise the workday checkout root** — `setup.yaml`'s hardcoded `~/Code/workday/eoin-farrell/dotfiles/...` becomes `{{ dotfiles_wd }}`, so a relocated checkout still links correctly. This subsumes the earlier Phase-1 note about `setup.yaml`.
+7. **Collapse `updateMachine`** (`zsh/functions.sh`): replace the `uname` branch + separate `base_setup`/`git_setup` calls with a single `ansible-playbook provision.yaml` run. The work overlay runs inside the same playbook via the `dotfiles_wd_present` guard, so `getLatestPackagesWD` keeps only its repo-pull/CLI-build duties (drop its `setup.yaml` call, or leave it for standalone use).
+8. **Fix the copy-paste comment headers** in `git_setup.yaml` / `claude.yaml` / workday `setup.yaml` (all mis-name the playbook).
+
+### Sequencing / risk
+
+This is the largest phase and touches provisioning, so stage it:
+- **3a** — extract shared includes (`tasks/macos.yaml`, `tasks/debian.yaml`, `tasks/oh_my_zsh.yaml`) and add `provision.yaml` that reproduces today's behaviour; keep old playbooks until proven. Verify with `--check --diff` on this Mac (empty diff = equivalent).
+- **3b** — introduce `tasks/link_dotfiles.yaml` + `tasks/link_tree.yaml`, migrate personal `git_setup` links, then the workday `setup.yaml` links (variabilised). `--check --diff` must show identical symlink targets.
+- **3c** — switch `updateMachine` to the single `provision.yaml` call; run for real on this machine and confirm symlinks/packages unchanged. Retire superseded playbooks.
+- Debian path (`tasks/debian.yaml`) can only be fully verified on `nr200p` — until then rely on `--check` and keep `base_setup_debian.yaml` as a fallback.
 
 ## Phase 4 — Consistency: config-file naming & shared shell files
 
