@@ -149,10 +149,10 @@ Concretely:
 ### Sequencing / risk
 
 This is the largest phase and touches provisioning, so stage it:
-- **3a** — extract shared includes (`tasks/macos.yaml`, `tasks/debian.yaml`, `tasks/oh_my_zsh.yaml`) and add `provision.yaml` that reproduces today's behaviour; keep old playbooks until proven. Verify with `--check --diff` on this Mac (empty diff = equivalent).
-- **3b** — introduce `tasks/link_dotfiles.yaml` + `tasks/link_tree.yaml`, migrate personal `git_setup` links, then the workday `setup.yaml` links (variabilised). `--check --diff` must show identical symlink targets.
-- **3c** — switch `updateMachine` to the single `provision.yaml` call; run for real on this machine and confirm symlinks/packages unchanged. Retire superseded playbooks.
-- Debian path (`tasks/debian.yaml`) can only be fully verified on a Debian box (`nr200p` or `t480`) — until then rely on `--check` and keep `base_setup_debian.yaml` as a fallback.
+- **3a** — extract shared includes (`tasks/macos.yaml`, `tasks/debian.yaml`, `tasks/oh_my_zsh.yaml`) and add `provision.yaml` that reproduces today's behaviour; keep old playbooks until proven. Verify with `--check --diff` on this Mac (empty diff = equivalent). ✅ Done — verified via `--check --diff` on both t480 (Debian) and the Mac; caught and fixed a real finalizer-ordering bug in the process.
+- **3b** — introduce `tasks/link_dotfiles.yaml` + `tasks/link_tree.yaml`, migrate personal `git_setup` links, then the workday `setup.yaml` links (variabilised). `--check --diff` must show identical symlink targets. ✅ Personal side done, incl. folding in `claude.yaml`/`tldr_setup.yaml` (both still wanted) and restoring the deleted `tmuxinator/` dir. ⏳ Workday `setup.yaml` side blocked on work-repo access (like Phase 1).
+- **3c** — switch `updateMachine` to the single `provision.yaml` call; run for real on this machine and confirm symlinks/packages unchanged. Retire superseded playbooks. ✅ `updateMachine` now calls `provision.yaml` alone (`git_setup.yaml` runs as its second play via `import_playbook`, and stays runnable standalone). `base_setup.yaml`/`base_setup_debian.yaml` deleted.
+- Debian path (`tasks/debian.yaml`) can only be fully verified on a Debian box (`nr200p` or `t480`) — until then rely on `--check` and keep `base_setup_debian.yaml` as a fallback. Superseded by the 3a/3c verification above.
 
 ## Phase 4 — Consistency: config-file naming & shared shell files
 

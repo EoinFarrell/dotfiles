@@ -1,5 +1,7 @@
 ---
-# ansible-playbook -i inventory.ini git_setup.yaml
+# ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 git_setup.yaml
+# Also runs as provision.yaml's second play (via import_playbook) — this
+# header is for the standalone-relink case.
 - name: "Git Setup"
   hosts: 127.0.0.1
   connection: local

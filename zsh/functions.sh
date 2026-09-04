@@ -129,13 +129,12 @@ updateMachine() {
     echo "==> Updating packages"
     getLatestPackages --skip-ansible
 
-    # 3. Provision: base_setup installs newly-declared casks/formulae/fonts + asdf
-    #    runtimes; git_setup relinks dotfiles and clones repos.
-    echo "==> Provisioning (base_setup + git_setup)"
-    local base_playbook="base_setup.yaml"
-    [ "$(uname -s)" = "Linux" ] && base_playbook="base_setup_debian.yaml"
-    ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 "$DOTFILES/ansible/$base_playbook"
-    ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 "$DOTFILES/ansible/git_setup.yaml"
+    # 3. Provision: installs newly-declared casks/formulae/fonts + asdf runtimes,
+    #    then relinks dotfiles and clones repos. provision.yaml fans out on
+    #    ansible_os_family itself (no more uname branch here) and runs
+    #    git_setup.yaml as its second play, so this is one invocation.
+    echo "==> Provisioning"
+    ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 "$DOTFILES/ansible/provision.yaml"
 
     # 4. Work laptop only: workday tool repos, CLIs, and overlay playbook.
     if [ -d "$DOTFILES_WD" ] && command -v getLatestPackagesWD >/dev/null 2>&1; then
