@@ -1,19 +1,46 @@
 ---
-# Shared user/CLI tool installation via Homebrew, used by base_setup.yaml
-# (native Homebrew) and base_setup_debian.yaml (Linuxbrew). The package
-# list itself lives in vars/homebrew_packages.yml — that's the one place
-# to add a new tool.
+# Shared user/CLI tool installation via Homebrew, used by provision.yaml on
+# both macOS (native Homebrew) and Debian (Linuxbrew). The package list
+# itself lives in vars/homebrew_packages.yml — that's the one place to add
+# a new tool.
+#
+# HOMEBREW_NO_AUTO_UPDATE on every task below: brew auto-updates (a full
+# catalog refresh, slow) before most commands by default. The explicit
+# "Update Homebrew" task in tasks/macos.yaml / tasks/debian.yaml already
+# did that refresh deliberately and visibly earlier in the run, so these
+# don't need to trigger it again — without this, e.g. `brew tap` here can
+# silently redo the same slow refresh as an unlabeled side effect.
+- name: Remove conflicting tldr formula (superseded by tealdeer)
+  # tldr-pages/tldr-c-client's formula is also named `tldr` and installs a
+  # `tldr` binary that collides with tealdeer's — Homebrew refuses to
+  # install tealdeer while it's linked ("Cannot install tealdeer because
+  # conflicting formulae are installed"). ADR-0001 chose tealdeer, so this
+  # unconditionally clears the way for it rather than requiring a manual
+  # `brew uninstall tldr` per machine. No-op if tldr was never installed.
+  # See: https://github.com/EoinFarrell/dotfiles/issues/17
+  community.general.homebrew:
+    name: tldr
+    state: absent
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
+
 - name: Install Homebrew packages
   community.general.homebrew:
     name: "{{ homebrew_packages }}"
     state: present
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
 
 - name: Tap Homebrew repositories
   community.general.homebrew_tap:
     name: "{{ homebrew_taps }}"
     state: present
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
 
 - name: Install tapped Homebrew packages
   community.general.homebrew:
     name: "{{ homebrew_tap_packages }}"
     state: present
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"

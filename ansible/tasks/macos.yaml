@@ -11,11 +11,15 @@
     state: absent
   loop:
     - obsidian
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
 
 - name: Install Casks
   community.general.homebrew:
     name: "homebrew/cask/{{ item }}"
     state: present
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
   loop:
     - devtoys
     - disk-inventory-x
@@ -43,11 +47,15 @@
     state: absent
   loop:
     - fzf
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
 
 - name: Install macOS-only Homebrew packages
   community.general.homebrew:
     name: "{{ item }}"
     state: present
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
   loop:
     # colima is a Docker Desktop replacement for macOS; Debian already
     # runs Docker Engine natively via apt, so it has no use there.
@@ -61,6 +69,8 @@
   community.general.homebrew_tap:
     name: "{{ item }}"
     state: present
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
   loop:
     - localsend/localsend
     # - sachaos/todoist
@@ -69,6 +79,8 @@
   community.general.homebrew:
     name: "{{ item }}"
     state: present
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
   loop:
     - localsend
     # - todoist
