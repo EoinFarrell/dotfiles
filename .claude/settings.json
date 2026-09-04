@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(time zsh:*)",
+      "Bash(do time:*)",
+      "Bash(zsh:*)",
+      "Bash(ansible-playbook:*)",
+      "Bash(test:*)",
+      "Bash(command -v:*)",
+      "Bash(dpkg:*)",
+      "Bash(rtk read *)",
+      "Bash(rtk git *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(gh auth *)",
+      "Bash(git remote *)",
+      "Bash(rtk grep *)",
+      "Bash(git -C /Users/eoin.farrell/Code/personal/dotfiles log -p --all -- '*unused.zsh')",
+      "Bash(rtk ls *)",
+      "Bash(git -C /Users/eoin.farrell/Code/personal/dotfiles log -p --all -S \"isItermSession\" -- .)",
+      "Bash(rtk wc *)",
+      "Bash(git -C /Users/eoin.farrell/Code/workday/eoin-farrell/dotfiles check-ignore -v zsh/.env)",
+      "Bash(python3 -c \"import yaml,sys; yaml.safe_load\\(open\\('/Users/eoin.farrell/Code/workday/eoin-farrell/dotfiles/ansible/setup.yaml'\\)\\)\")",
+      "Bash(rtk gh *)",
+      "Bash(gh repo *)",
+      "Bash(rtk find *)",
+      "Bash(zsh -c 'source zsh/functions.sh; type updateMachine >/dev/null && echo \"updateMachine defined\"; type isInternetAvailable >/dev/null && echo \"isInternetAvailable defined\"')",
+      "Bash(grep -n '~/\\\\|\\\\$HOME\\\\|/Users/' kubeswitch/switch-config.yaml)",
+      "Bash(bash -n envStart/base.sh)",
+      "Bash(bash -n envStart/connectivity/scylla.sh)",
+      "Bash(zsh -n zsh/startup/workday.sh)",
+      "Bash(zsh -n zsh/startup/init.sh)",
+      "Bash(git commit *)",
+      "Bash(git reset *)",
+      "Bash(git restore *)"
+    ]
+  }
+}

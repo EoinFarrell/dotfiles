@@ -1,11 +1,9 @@
 export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 
-CODE=~/Code
-PERSONAL=~/Code/personal
-DOTFILES=~/Code/personal/dotfiles
-DOTFILES_WD=~/Code/workday/eoin-farrell/dotfiles
-WDDOTFILES=$DOTFILES_WD
-WdDOTFILESD=$DOTFILES_WD
+export CODE=~/Code
+export PERSONAL=~/Code/personal
+export DOTFILES=~/Code/personal/dotfiles
+export DOTFILES_WD=~/Code/workday/eoin-farrell/dotfiles
 NOTES=~/Code/personal/notes.eoinfarrell.dev
 export PATH="$NOTES/bin:$PATH"
 HOMELAB=~/Code/personal/homelab.eoinfarrell.dev
