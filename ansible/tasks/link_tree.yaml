@@ -8,8 +8,9 @@
 #
 # src_root/dest_root MUST be absolute paths, not `~/...` — `find`'s
 # registered results are always absolute, and the regex_replace below does
-# a plain string-prefix swap against them. Use "{{ ansible_env.HOME }}/..."
-# rather than "~/..." when calling this.
+# a plain string-prefix swap against them. Use
+# "{{ ansible_facts['env']['HOME'] }}/..." rather than "~/..." when calling
+# this.
 - name: "Find files under {{ src_root }}"
   ansible.builtin.find:
     paths: "{{ src_root }}"
