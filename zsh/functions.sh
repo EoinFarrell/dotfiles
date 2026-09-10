@@ -26,6 +26,27 @@ _ensureBrewGlibcLocale() {
     fi
 }
 
+# provision.yaml runs a long series of `become: true` apt/repo tasks on
+# Debian, and updateMachine invokes ansible-playbook without -K (the -K
+# password relay stalls on long runs — see provision.yaml's header). So
+# prime the sudo timestamp interactively up front and hold it warm in the
+# background for the whole run; without this the first become-gated task
+# dies with "sudo: a password is required". No-op on macOS, where the
+# provision path never becomes.
+_sudoKeepaliveStart() {
+    [[ "$OSTYPE" == linux* ]] || return 0
+    command -v sudo >/dev/null 2>&1 || return 0
+    sudo -v || return 1
+    ( while true; do sudo -n true; sleep 50; kill -0 "$$" 2>/dev/null || exit; done ) &
+    _SUDO_KEEPALIVE_PID=$!
+}
+
+_sudoKeepaliveStop() {
+    [ -n "$_SUDO_KEEPALIVE_PID" ] || return 0
+    kill "$_SUDO_KEEPALIVE_PID" 2>/dev/null
+    unset _SUDO_KEEPALIVE_PID
+}
+
 # Modern asdf (0.16+) is a standalone binary installed via Homebrew, not a
 # git checkout at ~/.asdf/bin, and it dropped `asdf update` entirely —
 # Homebrew owns upgrading it now. ~/.asdf is just its data dir.
@@ -171,6 +192,10 @@ updateMachine() {
     #    ansible_os_family itself (no more uname branch here) and runs
     #    git_setup.yaml as its second play, so this is one invocation.
     echo "==> Provisioning"
+    if ! _sudoKeepaliveStart; then
+        echo "updateMachine: sudo auth failed, skipping provision." >&2
+        return 1
+    fi
     ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 "$DOTFILES/ansible/provision.yaml"
 
     # 4. Work laptop only: workday tool repos, CLIs, and overlay playbook.
@@ -179,6 +204,7 @@ updateMachine() {
         getLatestPackagesWD
     fi
 
+    _sudoKeepaliveStop
     echo "==> updateMachine complete"
 }
 
