@@ -44,3 +44,30 @@
     state: link
   loop: "{{ _link_tree_found.files }}"
   when: _link_tree_found.matched > 0
+
+# This task only ever *adds* links, so deleting a file from src_root leaves
+# its symlink dangling in dest_root forever — and e.g. oh-my-zsh.sh then
+# errors sourcing a removed zsh/oh-my-zsh/*.zsh. Sweep those out: a broken
+# symlink under dest_root whose target points back into src_root was ours
+# and is safe to drop. Real files (OMZ's own example.zsh), healthy links,
+# and broken links pointing elsewhere are all left alone. -print0 and the
+# find predicates are portable across GNU and BSD find (Linux + macOS).
+- name: "Check {{ dest_root }} exists before pruning"
+  ansible.builtin.stat:
+    path: "{{ dest_root }}"
+  register: _link_tree_dest
+
+- name: "Prune stale {{ dest_root }} symlinks whose {{ src_root }} source is gone"
+  ansible.builtin.shell: |
+    set -o pipefail
+    find "{{ dest_root }}" -type l ! -exec test -e {} \; -print0 |
+      while IFS= read -r -d '' link; do
+        case "$(readlink "$link")" in
+          "{{ src_root }}"/*) rm -v "$link" ;;
+        esac
+      done
+  args:
+    executable: /bin/bash
+  register: _link_tree_prune
+  changed_when: _link_tree_prune.stdout | trim | length > 0
+  when: _link_tree_dest.stat.exists
