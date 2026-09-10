@@ -19,84 +19,85 @@
     state: directory
     mode: '0755'
 
-# Every apt_repository task below sets update_cache: false — its default
-# (true) runs a full `apt-get update` on every single invocation, so with
-# 4 repos that's up to 4 redundant cache refreshes on every provision run,
-# even when nothing changed. "Update and upgrade apt packages" below does
-# the one combined refresh we actually need (and skips it entirely within
-# cache_valid_time), so new repos added here are still picked up by it.
-- name: Docker Apt
-  block:
-    - name: Check that docker key exists
-      ansible.builtin.stat:
-        path: /etc/apt/keyrings/docker.asc
-      register: docker_key_stat_result
+# deb822_repository respawns itself under the system Python to reach the
+# python-debian bindings, which aren't present in Linuxbrew's Python.
+# Install the package providing them before the repo tasks run.
+- name: Install python3-debian (needed by deb822_repository)
+  ansible.builtin.apt:
+    name: python3-debian
+    update_cache: false
+  become: true
 
-    - name: Add docker apt key
-      ansible.builtin.get_url:
-        url: https://download.docker.com/linux/debian/gpg
-        dest: /etc/apt/keyrings/docker.asc
-      when: not docker_key_stat_result.stat.exists
-      become: true
+# The deb822_repository tasks below don't refresh the apt cache (the
+# module never does one), and the apt tasks here pass update_cache: false.
+# "Update and upgrade apt packages" below does the single combined
+# `apt-get update` we actually need (and skips it entirely within
+# cache_valid_time), so repos added here are still picked up by it.
+#
+# signed_by takes the key URL directly — deb822_repository downloads it to
+# /etc/apt/keyrings/<name>.{asc,gpg} and wires up Signed-By, replacing the
+# separate get_url key tasks the old apt_repository form needed.
+- name: Add docker apt repo
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: https://download.docker.com/linux/debian
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: stable
+    architectures: "{{ deb_architecture.stdout }}"
+    signed_by: https://download.docker.com/linux/debian/gpg
+    state: present
+  become: true
 
-    - name: Add docker apt repo
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian/ {{ ansible_distribution_release }} stable"
-        state: present
-        update_cache: false
-      become: true
+- name: Add Terraform apt repo
+  ansible.builtin.deb822_repository:
+    name: terraform
+    types: deb
+    uris: https://apt.releases.hashicorp.com
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: main
+    architectures: "{{ deb_architecture.stdout }}"
+    signed_by: https://apt.releases.hashicorp.com/gpg
+    state: present
+  become: true
 
-- name: Terraform Apt
-  block:
-    - name: Check that Terraform key exists
-      ansible.builtin.stat:
-        path: /etc/apt/keyrings/terraform.asc
-      register: terraform_key_stat_result
+- name: Add Tailscale apt repo
+  ansible.builtin.deb822_repository:
+    name: tailscale
+    types: deb
+    uris: https://pkgs.tailscale.com/stable/debian
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: main
+    signed_by: https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg
+    state: present
+  become: true
 
-    - name: Add terraform apt key
-      ansible.builtin.get_url:
-        url: https://apt.releases.hashicorp.com/gpg
-        dest: /etc/apt/keyrings/terraform.asc
-      when: not terraform_key_stat_result.stat.exists
-      become: true
+- name: Add Debian Contrib & Non-Free apt repo (steam)
+  ansible.builtin.deb822_repository:
+    name: debian-contrib-nonfree
+    types: deb
+    uris: http://deb.debian.org/debian
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components:
+      - contrib
+      - non-free
+    state: present
+  become: true
 
-    - name: Add Terraform apt repo
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/terraform.asc] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
-        state: present
-        update_cache: false
-      become: true
-
-- name: Tailscale Apt
-  block:
-    - name: Check that Tailscale key exists
-      ansible.builtin.stat:
-        path: /etc/apt/keyrings/tailscale.gpg
-      register: tailscale_key_stat_result
-
-    - name: Add tailscale apt key
-      ansible.builtin.get_url:
-        url: https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg
-        dest: /etc/apt/keyrings/tailscale.gpg
-        force: yes
-        mode: '0644'
-      become: true
-
-    - name: Add Tailscale apt repo
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/etc/apt/keyrings/tailscale.gpg] https://pkgs.tailscale.com/stable/debian {{ ansible_distribution_release }} main"
-        state: present
-        update_cache: false
-      become: true
-
-- name: Debian Contrib & Non-Free (steam)
-  block:
-    - name: Add Debian Contrib & Non-Free apt repo
-      ansible.builtin.apt_repository:
-        repo: "deb http://deb.debian.org/debian/ {{ ansible_distribution_release }} contrib non-free"
-        state: present
-        update_cache: false
-      become: true
+# deb822_repository writes .sources files; the ansible.builtin.apt_repository
+# tasks it replaced left .list files behind. Remove them so each repo isn't
+# defined twice. One-time migration — drop this task once every machine
+# (macOS, nr200p, t480) has run the converted playbook at least once.
+- name: Remove legacy apt_repository .list files
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d/{{ item }}"
+    state: absent
+  loop:
+    - download_docker_com_linux_debian.list
+    - apt_releases_hashicorp_com.list
+    - pkgs_tailscale_com_stable_debian.list
+    - deb_debian_org_debian.list
+  become: true
 
 ### Install Packages ###
 

@@ -117,14 +117,14 @@
   - name: Link oh-my-zsh custom scripts
     ansible.builtin.include_tasks: tasks/link_tree.yaml
     vars:
-      src_root: "{{ ansible_env.HOME }}/Code/personal/dotfiles/zsh/oh-my-zsh"
-      dest_root: "{{ ansible_env.HOME }}/.oh-my-zsh/custom"
+      src_root: "{{ ansible_facts['env']['HOME'] }}/Code/personal/dotfiles/zsh/oh-my-zsh"
+      dest_root: "{{ ansible_facts['env']['HOME'] }}/.oh-my-zsh/custom"
       patterns: '*.zsh'
   - name: Link tmuxinator configs
     ansible.builtin.include_tasks: tasks/link_tree.yaml
     vars:
-      src_root: "{{ ansible_env.HOME }}/Code/personal/dotfiles/tmuxinator"
-      dest_root: "{{ ansible_env.HOME }}/.config/tmuxinator"
+      src_root: "{{ ansible_facts['env']['HOME'] }}/Code/personal/dotfiles/tmuxinator"
+      dest_root: "{{ ansible_facts['env']['HOME'] }}/.config/tmuxinator"
   # Folded in from the formerly-orphaned tldr_setup.yaml (Phase 3b). tldr
   # pages live under $DOTFILES/../notes.eoinfarrell.dev/tldr and are used
   # on every machine, not just macOS — tealdeer's own default pages dir
@@ -133,11 +133,11 @@
   - name: Link tldr custom pages
     ansible.builtin.include_tasks: tasks/link_tree.yaml
     vars:
-      src_root: "{{ ansible_env.HOME }}/Code/personal/notes.eoinfarrell.dev/tldr"
+      src_root: "{{ ansible_facts['env']['HOME'] }}/Code/personal/notes.eoinfarrell.dev/tldr"
       dest_root: >-
-        {{ (ansible_env.HOME ~ '/Library/Application Support/tealdeer/pages')
+        {{ (ansible_facts['env']['HOME'] ~ '/Library/Application Support/tealdeer/pages')
            if ansible_facts['os_family'] == 'Darwin'
-           else (ansible_env.HOME ~ '/.local/share/tealdeer/pages') }}
+           else (ansible_facts['env']['HOME'] ~ '/.local/share/tealdeer/pages') }}
   # Folded in from the formerly-orphaned claude.yaml (Phase 3b). Uses
   # prune_unmanaged since ~/.claude/skills and ~/.agents/skills exist only
   # to hold these managed symlinks — unlike personal_dotfile_links' targets,
