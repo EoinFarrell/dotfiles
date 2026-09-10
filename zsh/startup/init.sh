@@ -18,6 +18,10 @@ export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 source ~/Code/personal/dotfiles/zsh/startup/validation.sh
 source ~/Code/personal/dotfiles/zsh/functions.sh
 
+# Repair the Homebrew glibc locale link before anything below (sops, etc.)
+# shells out to a brew-linked binary. See the function for the full why.
+_ensureBrewGlibcLocale
+
 # Decrypt and export environment variables from encrypted .env file
 if [ -r "$DOTFILES/zsh/.env.enc" ] && command -v sops >/dev/null 2>&1; then
     eval "$(sops decrypt --input-type dotenv --output-type dotenv $DOTFILES/zsh/.env.enc | sed 's/^/export /')"

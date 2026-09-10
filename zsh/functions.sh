@@ -5,11 +5,81 @@
 # silently dropping unrelated steps (e.g. brew upgrades used to be
 # gated on `switch -v kubectl`, which had nothing to do with brew).
 
+# Homebrew on Linux ships its own glibc (nearly every formula depends on
+# it) but its locale dir, .../Cellar/glibc/<ver>/lib/locale, is empty — so
+# every brew-linked binary (python, ansible, tmux, ...) fails setlocale()
+# for ANY locale, even C.UTF-8. Point it at the system locale data.
+#
+# This can't live in the Ansible playbook: ansible itself is one of the
+# brew-linked binaries that won't start until the link exists. So it runs
+# here — from shell init (fixes tmux et al on login) and again before each
+# updateMachine Ansible run. Idempotent; no-op off Linuxbrew. The Cellar
+# dir is user-owned, so no sudo. `brew upgrade glibc` wipes the versioned
+# dir, which is why this re-checks every time rather than once.
+_ensureBrewGlibcLocale() {
+    local brew_locale=/home/linuxbrew/.linuxbrew/opt/glibc/lib/locale
+    [ -d "${brew_locale%/locale}" ] || return 0            # glibc keg not installed
+    [ -e "$brew_locale" ] || [ -L "$brew_locale" ] && return 0   # already linked/populated
+    [ -d /usr/lib/locale ] || return 0
+    if ln -s /usr/lib/locale "$brew_locale" 2>/dev/null; then
+        echo "Linked Homebrew glibc locale dir -> /usr/lib/locale"
+    fi
+}
+
+# Run provision.yaml, handling sudo for its Debian `become: true` tasks.
+#
+# Priming the sudo timestamp with `sudo -v` up front does NOT carry over to
+# ansible's own sudo call — Debian defaults to per-tty timestamps
+# (tty_tickets) and ansible's become runs on a different tty, so it still
+# dies with "sudo: a password is required". -K isn't an option either (its
+# password relay stalls on long runs — see provision.yaml's header). So
+# prompt once here and pass it to ansible via --become-password-file.
+# Skipped when sudo is already passwordless, and on macOS where nothing
+# becomes.
+_ansibleProvision() {
+    local -a cmd=(
+        ansible-playbook --connection=local
+        --inventory 127.0.0.1, --limit 127.0.0.1
+        "$DOTFILES/ansible/provision.yaml"
+    )
+
+    if [[ "$OSTYPE" != linux* ]] || ! command -v sudo >/dev/null 2>&1 \
+       || sudo -n true 2>/dev/null; then
+        "${cmd[@]}"
+        return
+    fi
+
+    # --become-password-file needs a real path (a /dev/fd pipe is rejected),
+    # so stage the password in a mode-600 tmpfile and shred it straight
+    # after. The subshell trap covers a Ctrl-C out of the ansible run.
+    local _pwfile
+    _pwfile=$(mktemp) || return 1
+    chmod 600 "$_pwfile"
+
+    local _pw
+    printf '[sudo] password for provisioning: ' >&2
+    IFS= read -rs _pw
+    printf '\n' >&2
+    printf '%s\n' "$_pw" > "$_pwfile"
+    unset _pw
+
+    (
+        trap 'rm -f "$_pwfile"' EXIT INT TERM
+        "${cmd[@]}" --become-password-file "$_pwfile"
+    )
+    local _rc=$?
+    rm -f "$_pwfile"
+    return $_rc
+}
+
+# Modern asdf (0.16+) is a standalone binary installed via Homebrew, not a
+# git checkout at ~/.asdf/bin, and it dropped `asdf update` entirely —
+# Homebrew owns upgrading it now. ~/.asdf is just its data dir.
 _updateAsdf() {
-    if [ -x "$HOME/.asdf/bin/asdf" ]; then
-        "$HOME/.asdf/bin/asdf" update
+    if command -v asdf >/dev/null 2>&1 && command -v brew >/dev/null 2>&1; then
+        brew upgrade asdf
     else
-        echo "asdf not found, skipping asdf update"
+        echo "asdf or brew not found, skipping asdf upgrade"
     fi
 }
 
@@ -46,9 +116,13 @@ _updatePluginRepos() {
 
 # Regenerated file here is loaded via the kubectl-autocomplete oh-my-zsh
 # plugin, added to `plugins=(...)` in zsh/zshrc and sourced from there.
+# mkdir -p first: on a fresh machine the plugin dir doesn't exist yet, and
+# the bare `>` redirect fails with "no such file or directory".
 _updateKubectlCompletion() {
     if command -v kubectl >/dev/null 2>&1; then
-        kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
+        local dest=~/.oh-my-zsh/custom/plugins/kubectl-autocomplete
+        mkdir -p "$dest"
+        kubectl completion zsh > "$dest/kubectl-autocomplete.plugin.zsh"
     else
         echo "kubectl not found, skipping kubectl completion regen"
     fi
@@ -56,9 +130,12 @@ _updateKubectlCompletion() {
 
 # Regenerated file here is loaded via the switch-autocomplete oh-my-zsh
 # plugin, added to `plugins=(...)` in zsh/zshrc and sourced from there.
+# See _updateKubectlCompletion for why mkdir -p comes first.
 _updateSwitchCompletion() {
     if command -v switch >/dev/null 2>&1; then
-        switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
+        local dest=~/.oh-my-zsh/custom/plugins/switch-autocomplete
+        mkdir -p "$dest"
+        switch completion zsh > "$dest/switch-autocomplete.plugin.zsh"
     else
         echo "switch not found, skipping switch completion regen"
     fi
@@ -89,6 +166,8 @@ getLatestPackages() {
     done
 
     if isInternetAvailable; then
+        _ensureBrewGlibcLocale   # ansible-playbook below won't start without it
+
         _updateAsdf &
         _updateTldr &
         _updateTmuxinator &
@@ -117,6 +196,10 @@ updateMachine() {
         return 1
     fi
 
+    # 0. Repair the Homebrew glibc locale link if a glibc upgrade wiped it,
+    #    before anything below shells out to a brew-linked binary.
+    _ensureBrewGlibcLocale
+
     # 1. Pull the dotfiles repos themselves so we provision from the latest source.
     echo "==> Pulling dotfiles repos"
     git -C "$DOTFILES" pull --ff-only
@@ -134,7 +217,7 @@ updateMachine() {
     #    ansible_os_family itself (no more uname branch here) and runs
     #    git_setup.yaml as its second play, so this is one invocation.
     echo "==> Provisioning"
-    ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 "$DOTFILES/ansible/provision.yaml"
+    _ansibleProvision
 
     # 4. Work laptop only: workday tool repos, CLIs, and overlay playbook.
     if [ -d "$DOTFILES_WD" ] && command -v getLatestPackagesWD >/dev/null 2>&1; then
