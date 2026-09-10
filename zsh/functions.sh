@@ -5,11 +5,35 @@
 # silently dropping unrelated steps (e.g. brew upgrades used to be
 # gated on `switch -v kubectl`, which had nothing to do with brew).
 
+# Homebrew on Linux ships its own glibc (nearly every formula depends on
+# it) but its locale dir, .../Cellar/glibc/<ver>/lib/locale, is empty — so
+# every brew-linked binary (python, ansible, tmux, ...) fails setlocale()
+# for ANY locale, even C.UTF-8. Point it at the system locale data.
+#
+# This can't live in the Ansible playbook: ansible itself is one of the
+# brew-linked binaries that won't start until the link exists. So it runs
+# here — from shell init (fixes tmux et al on login) and again before each
+# updateMachine Ansible run. Idempotent; no-op off Linuxbrew. The Cellar
+# dir is user-owned, so no sudo. `brew upgrade glibc` wipes the versioned
+# dir, which is why this re-checks every time rather than once.
+_ensureBrewGlibcLocale() {
+    local brew_locale=/home/linuxbrew/.linuxbrew/opt/glibc/lib/locale
+    [ -d "${brew_locale%/locale}" ] || return 0            # glibc keg not installed
+    [ -e "$brew_locale" ] || [ -L "$brew_locale" ] && return 0   # already linked/populated
+    [ -d /usr/lib/locale ] || return 0
+    if ln -s /usr/lib/locale "$brew_locale" 2>/dev/null; then
+        echo "Linked Homebrew glibc locale dir -> /usr/lib/locale"
+    fi
+}
+
+# Modern asdf (0.16+) is a standalone binary installed via Homebrew, not a
+# git checkout at ~/.asdf/bin, and it dropped `asdf update` entirely —
+# Homebrew owns upgrading it now. ~/.asdf is just its data dir.
 _updateAsdf() {
-    if [ -x "$HOME/.asdf/bin/asdf" ]; then
-        "$HOME/.asdf/bin/asdf" update
+    if command -v asdf >/dev/null 2>&1 && command -v brew >/dev/null 2>&1; then
+        brew upgrade asdf
     else
-        echo "asdf not found, skipping asdf update"
+        echo "asdf or brew not found, skipping asdf upgrade"
     fi
 }
 
@@ -46,9 +70,13 @@ _updatePluginRepos() {
 
 # Regenerated file here is loaded via the kubectl-autocomplete oh-my-zsh
 # plugin, added to `plugins=(...)` in zsh/zshrc and sourced from there.
+# mkdir -p first: on a fresh machine the plugin dir doesn't exist yet, and
+# the bare `>` redirect fails with "no such file or directory".
 _updateKubectlCompletion() {
     if command -v kubectl >/dev/null 2>&1; then
-        kubectl completion zsh > ~/.oh-my-zsh/custom/plugins/kubectl-autocomplete/kubectl-autocomplete.plugin.zsh
+        local dest=~/.oh-my-zsh/custom/plugins/kubectl-autocomplete
+        mkdir -p "$dest"
+        kubectl completion zsh > "$dest/kubectl-autocomplete.plugin.zsh"
     else
         echo "kubectl not found, skipping kubectl completion regen"
     fi
@@ -56,9 +84,12 @@ _updateKubectlCompletion() {
 
 # Regenerated file here is loaded via the switch-autocomplete oh-my-zsh
 # plugin, added to `plugins=(...)` in zsh/zshrc and sourced from there.
+# See _updateKubectlCompletion for why mkdir -p comes first.
 _updateSwitchCompletion() {
     if command -v switch >/dev/null 2>&1; then
-        switch completion zsh > ~/.oh-my-zsh/custom/plugins/switch-autocomplete/switch-autocomplete.plugin.zsh
+        local dest=~/.oh-my-zsh/custom/plugins/switch-autocomplete
+        mkdir -p "$dest"
+        switch completion zsh > "$dest/switch-autocomplete.plugin.zsh"
     else
         echo "switch not found, skipping switch completion regen"
     fi
@@ -89,6 +120,8 @@ getLatestPackages() {
     done
 
     if isInternetAvailable; then
+        _ensureBrewGlibcLocale   # ansible-playbook below won't start without it
+
         _updateAsdf &
         _updateTldr &
         _updateTmuxinator &
@@ -116,6 +149,10 @@ updateMachine() {
         echo "updateMachine: no internet, skipping." >&2
         return 1
     fi
+
+    # 0. Repair the Homebrew glibc locale link if a glibc upgrade wiped it,
+    #    before anything below shells out to a brew-linked binary.
+    _ensureBrewGlibcLocale
 
     # 1. Pull the dotfiles repos themselves so we provision from the latest source.
     echo "==> Pulling dotfiles repos"

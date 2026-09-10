@@ -17,6 +17,12 @@ brew install ansible
 
 # git clone https://github.com/asdf-vm/asdf.git ~/.asdf #--branch v0.11.3
 
+# Answer "No" to "Authenticate Git with your GitHub credentials?" — the
+# credential.helper block is maintained by hand in git/.gitconfig (bare
+# `gh`, with a fall-through wrapper so it degrades gracefully before auth).
+# Saying yes runs `gh auth setup-git`, which rewrites that block with a
+# machine-specific absolute path to gh and drops the wrapper. git/.gitconfig
+# is a symlink into this repo, so that rewrite shows up as a spurious diff.
 gh auth login
 
 # sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
