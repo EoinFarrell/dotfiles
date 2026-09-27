@@ -1,0 +1,42 @@
+# Overlay engine for claude_skill_repos (issue #24 / ADR 0003). Included
+# from git_setup.yaml. Parameters (set via `vars:` on the include_tasks
+# call):
+#   skill_repos        - claude_skill_repos-shaped list ({name, skills})
+#   overlays_dir        - directory containing <basename>.patch files
+#   build_dir_root      - directory materialized skill output is written under
+#
+#   skill_clone_root    - directory upstream skill repos are cloned under
+#                          (each repo at <skill_clone_root>/<repo.name>)
+#
+# For each skill: if <overlays_dir>/<basename>.patch exists, the overlay is
+# checked with `git apply --check` directly against the upstream clone
+# (read-only, never mutates the clone). A clean check rebuilds
+# <build_dir_root>/<basename> from upstream + patch. A failing check leaves
+# any previously-materialized build dir untouched and records the skill in
+# skill_overlay_failures for the caller to fail the run on. Skills with no
+# overlay file are left for the caller to symlink straight to the upstream
+# clone — this task never touches them.
+- name: Reset skill overlay result facts
+  ansible.builtin.set_fact:
+    skill_overlay_results: []
+    skill_overlay_failures: []
+
+- name: Locate skill overlay patch files
+  ansible.builtin.stat:
+    path: "{{ overlays_dir }}/{{ item.1 | basename }}.patch"
+  loop: "{{ skill_repos | subelements('skills') }}"
+  loop_control:
+    label: "{{ item.1 | basename }}"
+  register: _skill_overlay_stats
+
+- name: Materialize skills with a present overlay
+  ansible.builtin.include_tasks: materialize_one_skill_overlay.yaml
+  vars:
+    _basename: "{{ item.item.1 | basename }}"
+    _src_dir: "{{ skill_clone_root }}/{{ item.item.0.name }}/{{ item.item.1 }}"
+    _build_dir: "{{ build_dir_root }}/{{ _basename }}"
+    _patch: "{{ item.stat.path }}"
+  loop: "{{ _skill_overlay_stats.results }}"
+  loop_control:
+    label: "{{ item.item.1 | basename }}"
+  when: item.stat.exists

@@ -1,0 +1,39 @@
+# One iteration of the loop in materialize_skill_overlays.yaml, split into
+# its own file because Ansible blocks can't carry a `loop:` themselves.
+# Expects `item` (one entry of _skill_overlay_stats.results) plus the
+# per-iteration vars set by the calling loop: _basename, _src_dir,
+# _build_dir, _patch.
+- name: Check overlay patch applies cleanly against current upstream
+  ansible.builtin.command:
+    cmd: "git apply --check {{ _patch }}"
+    chdir: "{{ _src_dir }}"
+  register: _patch_check
+  changed_when: false
+  failed_when: false
+
+- name: Rebuild materialized skill (overlay applies cleanly)
+  when: _patch_check.rc == 0
+  block:
+    - name: Remove stale materialized skill
+      ansible.builtin.file:
+        path: "{{ _build_dir }}"
+        state: absent
+    - name: Copy upstream skill into build dir
+      ansible.builtin.copy:
+        src: "{{ _src_dir }}/"
+        dest: "{{ _build_dir }}/"
+        remote_src: true
+    - name: Apply overlay patch to materialized skill
+      ansible.builtin.command:
+        cmd: "git apply {{ _patch }}"
+        chdir: "{{ _build_dir }}"
+      changed_when: true
+
+- name: Record overlay failure (materialized skill left untouched)
+  ansible.builtin.set_fact:
+    skill_overlay_failures: "{{ skill_overlay_failures + [{'basename': _basename, 'patch': _patch, 'error': _patch_check.stderr}] }}"
+  when: _patch_check.rc != 0
+
+- name: Record overlay result
+  ansible.builtin.set_fact:
+    skill_overlay_results: "{{ skill_overlay_results + [{'basename': _basename, 'build_dir': _build_dir}] }}"

@@ -98,6 +98,11 @@
     claude_link_dirs:
       - ~/.claude/skills
       - ~/.agents/skills
+
+    # ADR 0003: per-skill overlay patches, keyed by destination symlink
+    # basename, materialized into build_dir_root before linking.
+    claude_skill_overlays_dir: "{{ playbook_dir }}/../claude/skill-overlays"
+    claude_skill_build_dir_root: ~/Code/claude/.build
   tasks:
   - name: Setup Code dirs
     ansible.builtin.file:
@@ -153,9 +158,20 @@
       dest: ~/Code/claude/{{ item.name }}
       update: no
     loop: "{{ claude_skill_repos }}"
+  - name: Materialize skill overlays
+    ansible.builtin.include_tasks: tasks/materialize_skill_overlays.yaml
+    vars:
+      skill_repos: "{{ claude_skill_repos }}"
+      skill_clone_root: ~/Code/claude
+      overlays_dir: "{{ claude_skill_overlays_dir }}"
+      build_dir_root: "{{ claude_skill_build_dir_root }}"
   - name: Build claude_dotfile_links from claude_skill_repos
+    vars:
+      _basename: "{{ item.1 | basename }}"
+      _overlay_result: "{{ skill_overlay_results | selectattr('basename', 'equalto', _basename) | list }}"
+      _src: "{{ _overlay_result[0].build_dir if _overlay_result | length > 0 else '~/Code/claude/' + item.0.name + '/' + item.1 }}"
     ansible.builtin.set_fact:
-      claude_dotfile_links: "{{ claude_dotfile_links | default([]) + [{'src': '~/Code/claude/' + item.0.name + '/' + item.1, 'dest': '~/.claude/skills/' + (item.1 | basename)}, {'src': '~/Code/claude/' + item.0.name + '/' + item.1, 'dest': '~/.agents/skills/' + (item.1 | basename)}] }}"
+      claude_dotfile_links: "{{ claude_dotfile_links | default([]) + [{'src': _src, 'dest': '~/.claude/skills/' + _basename}, {'src': _src, 'dest': '~/.agents/skills/' + _basename}] }}"
     loop: "{{ claude_skill_repos | subelements('skills') }}"
   - name: Link Claude skills
     ansible.builtin.include_tasks: tasks/link_dotfiles.yaml
@@ -163,6 +179,18 @@
       links: "{{ claude_dotfile_links }}"
       link_dirs: "{{ claude_link_dirs }}"
       prune_unmanaged: true
+  - name: Fail if any skill overlay could not be applied
+    # Runs last so every other skill still gets linked this run — a
+    # drifted overlay reports loudly (ADR 0003) rather than blocking
+    # provisioning for skills unrelated to it.
+    ansible.builtin.fail:
+      msg: >-
+        {{ skill_overlay_failures | length }} skill overlay(s) failed to
+        apply against current upstream content, likely due to upstream
+        drift: {{ skill_overlay_failures | map(attribute='basename') | list }}.
+        Reconcile each overlay patch by hand (see the 'error' field on each
+        entry for git apply's message) before re-running.
+    when: skill_overlay_failures | length > 0
   - name: Clone fzf-tab plugin
     ansible.builtin.git:
       repo: "https://github.com/Aloxaf/fzf-tab.git"
