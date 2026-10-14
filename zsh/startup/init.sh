@@ -20,7 +20,7 @@ source ~/Code/personal/dotfiles/zsh/functions.sh
 
 # Repair the Homebrew glibc locale link before anything below (sops, etc.)
 # shells out to a brew-linked binary. See the function for the full why.
-_ensureBrewGlibcLocale
+[[ $OSTYPE == linux* ]] && _ensureBrewGlibcLocale
 
 # Decrypt and export environment variables from encrypted .env file
 if [ -r "$DOTFILES/zsh/.env.enc" ] && command -v sops >/dev/null 2>&1; then

@@ -159,6 +159,17 @@ _updateBrew() {
     echo "---------------------"
 }
 
+# Remove zcompdump files left behind by old zsh versions, other hosts and
+# interrupted compinit runs (the per-PID ones). Keeps the live dump + its .zwc.
+_cleanStaleZcompdump() {
+    local live="${ZSH_COMPDUMP:-}" f
+    [ -n "$live" ] || return 0
+    for f in "$HOME"/.zcompdump*(N); do
+        [[ "$f" == "$live" || "$f" == "$live.zwc" || -d "$f" ]] && continue   # -d: compinit's .lock dir
+        rm -f "$f"
+    done
+}
+
 getLatestPackages() {
     local skip_ansible=0
     for arg in "$@"; do
@@ -167,6 +178,7 @@ getLatestPackages() {
 
     if isInternetAvailable; then
         _ensureBrewGlibcLocale   # ansible-playbook below won't start without it
+        _cleanStaleZcompdump
 
         _updateAsdf &
         _updateTldr &
@@ -537,6 +549,9 @@ function dockerRun(){
 _sops_decrypt_if_changed() {
     local enc="$1" dest="$2" input_type="$3" output_type="${4:-$3}"
     [ -s "$enc" ] || return 0
+    # Plaintext already newer than the encrypted file: nothing to decrypt.
+    # Saves ~150ms per call (a sops process) on every shell start.
+    [ -s "$dest" ] && [ "$dest" -nt "$enc" ] && return 0
     local tmp
     tmp=$(mktemp)
     sops decrypt --input-type "$input_type" --output-type "$output_type" "$enc" > "$tmp"
@@ -544,6 +559,7 @@ _sops_decrypt_if_changed() {
         mv "$tmp" "$dest"
     else
         rm "$tmp"
+        touch "$dest"   # mark as up to date so the mtime check short-circuits next time
     fi
 }
 
