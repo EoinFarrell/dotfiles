@@ -28,6 +28,7 @@ if [ -r "$DOTFILES/zsh/.env.enc" ] && command -v sops >/dev/null 2>&1; then
 fi
 
 source $DOTFILES/zsh/startup/random.sh
+source $DOTFILES/zsh/startup/tmux-copy.sh
 
 if [ -r "$DOTFILES_WD/zsh/init.sh" ]; then
 	source "$DOTFILES_WD/zsh/init.sh"
