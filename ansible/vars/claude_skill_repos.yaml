@@ -39,3 +39,6 @@ claude_skill_repos:
     skills:
       - pstack/skills/technical-writing
       - pstack/skills/unslop
+  - name: GoogleChrome/modern-web-guidance
+    skills:
+      - skills/modern-web-guidance
