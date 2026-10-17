@@ -4,10 +4,28 @@
   hosts: nr200p
   become: true
   tasks:
-    - name: somerepo | apt source
-      ansible.builtin.apt_repository:
-        repo: "deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware"
-        state: present
+    # lineinfile instead of the deprecated apt_repository; nvidia-driver lives in non-free
+    - name: Ensure the Debian bookworm apt source has contrib and non-free
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list
+        regexp: '^deb http://deb\.debian\.org/debian/ bookworm main contrib non-free non-free-firmware$'
+        line: "deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware"
+      register: debian_source
+
+    # The installer's security line only has non-free-firmware. bookworm-security then offers the
+    # new firmware-nvidia-gsp (535.309.01) without the matching nvidia-kernel-dkms (in non-free),
+    # so PackageKit removed nvidia-driver to resolve it and the screen fell back to efifb 800x600.
+    - name: Add non-free to the bookworm-security apt source (driver + firmware must update together)
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list
+        regexp: '^deb http://security.debian.org/debian-security bookworm-security '
+        line: "deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware"
+      register: security_source
+
+    - name: Refresh apt cache after changing sources
+      apt:
+        update_cache: true
+      when: debian_source is changed or security_source is changed
     
     # - name: somerepo | no apt key
     #   ansible.builtin.get_url:
@@ -25,13 +43,14 @@
         upgrade: yes
         update_cache: yes
         cache_valid_time: 86400
-    - name: Install base packages
+    - name: Install NVIDIA driver
       apt:
         pkg:
           - nvidia-driver
           - firmware-misc-nonfree
-        state: latest
+        state: present
         update_cache: true
+      register: nvidia_driver
     - name: Add arch
       command: dpkg --add-architecture i386
     - name: Update and upgrade apt packages
@@ -60,7 +79,7 @@
       register: reboot_required_file
     - name: Reboot the server (if required).
       ansible.builtin.reboot:
-      when: reboot_required_file.stat.exists == true
+      when: reboot_required_file.stat.exists or nvidia_driver is changed
     - name: Remove dependencies that are no longer required.
       ansible.builtin.apt:
         autoremove: yes
