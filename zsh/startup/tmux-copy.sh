@@ -7,6 +7,10 @@
 #
 #   copylast        previous command line + its output
 #   copylast -o     previous output only
+#   copylast 3      the last 3 commands and their output
+#   copylast ~2     just the 2nd-to-last command (like HEAD~2; ~1 is the last)
+#
+# -o combines with either form, e.g. `copylast -o ~2`.
 #
 # Goes to the tmux paste buffer and, via OSC 52 (`load-buffer -w`), to the
 # system clipboard of the outer terminal.
@@ -21,8 +25,16 @@ _osc133_preexec() { printf '\e[A\e]133;A\e\\\e[B\r\e]133;C\e\\' }
 preexec_functions+=(_osc133_preexec)
 
 copylast() {
-    local skip=0
-    [[ $1 == -o ]] && skip=1
+    local skip=0 oldest=1 newest=1
+    while (( $# )); do
+        case $1 in
+            -o) skip=1 ;;
+            '~'<1->) oldest=${1#\~}; newest=$oldest ;;
+            <1->) oldest=$1; newest=1 ;;
+            *) echo "usage: copylast [-o] [N | ~K]" >&2; return 2 ;;
+        esac
+        shift
+    done
     [[ -n $TMUX ]] || { echo "copylast: not inside tmux" >&2; return 1; }
 
     # A multi-line prompt leaves header lines between the output and the next
@@ -35,19 +47,19 @@ copylast() {
     fi
 
     local text
-    text=$(tmux capture-pane -p -J -S - -L -F | awk -v hdr="$header" -v skip="$skip" '
+    text=$(tmux capture-pane -p -J -S - -L -F | awk -v hdr="$header" -v skip="$skip" -v oldest="$oldest" -v newest="$newest" '
         { n++; flags[n] = $2; sub(/^[0-9]+ [^ ]+ ?/, ""); txt[n] = $0 }
         END {
             # Only real commands carry a P flag (it is emitted from preexec), so
-            # the last two P lines are copylast itself and the command before it.
-            cur = 0; prev = 0
-            for (i = n; i >= 1; i--) {
-                if (flags[i] !~ /P/) continue
-                if (!cur) cur = i
-                else { prev = i; break }
+            # the last P line is copylast itself and the ones before it are the
+            # commands to pick from; k=1 is the command just before copylast.
+            m = 0
+            for (i = 1; i <= n; i++) if (flags[i] ~ /P/) p[++m] = i
+            if (m - oldest < 1) exit 1
+            for (k = oldest; k >= newest; k--) {
+                start = p[m - k]; end = p[m - k + 1]
+                for (i = start + skip; i < end - hdr; i++) print txt[i]
             }
-            if (!prev) exit 1
-            for (i = prev + skip; i < cur - hdr; i++) print txt[i]
         }') || { echo "copylast: no previous command found (are OSC 133 markers on? try a new shell)" >&2; return 1; }
 
     # The command line still carries the prompt before it (e.g. " $<powerline
