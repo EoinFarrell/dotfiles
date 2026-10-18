@@ -51,6 +51,25 @@
         state: present
         update_cache: true
       register: nvidia_driver
+    # GPU in Docker containers on this host. The "nvidia" runtime entry itself lives in the
+    # homelab repo's ansible/files/docker/daemon.nr200p.eoinf.com.json (setup_agent.yaml), so do
+    # NOT run `nvidia-ctk runtime configure` here: it would rewrite /etc/docker/daemon.json.
+    - name: Add the NVIDIA container toolkit apt signing key
+      ansible.builtin.get_url:
+        url: https://nvidia.github.io/libnvidia-container/gpgkey
+        dest: /etc/apt/keyrings/nvidia-container-toolkit.asc
+        mode: "0644"
+    - name: Add the NVIDIA container toolkit apt source
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/nvidia-container-toolkit.list
+        content: "deb [signed-by=/etc/apt/keyrings/nvidia-container-toolkit.asc] https://nvidia.github.io/libnvidia-container/stable/deb/$(ARCH) /\n"
+        mode: "0644"
+      register: nvidia_ctk_source
+    - name: Install nvidia-container-toolkit (provides nvidia-container-runtime)
+      ansible.builtin.apt:
+        name: nvidia-container-toolkit
+        state: present
+        update_cache: "{{ nvidia_ctk_source is changed }}"
     - name: Add arch
       command: dpkg --add-architecture i386
     - name: Update and upgrade apt packages
