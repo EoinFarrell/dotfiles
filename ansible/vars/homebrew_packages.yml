@@ -18,13 +18,13 @@ homebrew_packages:
   - coreutils
   - docker-compose
   - doggo
+  - fzf # required by the fzf-tab zsh plugin
   - gh
   - git
   - guile
   - helix
   - helm
   - hstr
-  - hugo
   - jq
   - kubectl
   - kubectx
@@ -35,7 +35,6 @@ homebrew_packages:
   - mdcat
   - mysql
   - openssl@3
-  - prettier
   - protobuf
   - rsync
   - superfile
