@@ -6,8 +6,15 @@
 # $DOTFILES_WD) can load the same source of truth via vars_files when
 # resolving a skill overlay's upstream path (ADR 0003) — the satellite
 # depends on the root here, never the other way round.
+#
+# `prefix` is required per repo. Each skill is linked as
+# <prefix>-<skill basename> (e.g. matt-tdd) so skills with the same name
+# in different repos (matt-tdd vs howdah-tdd) never collide. Claude Code
+# takes the skill name from the directory, not SKILL.md's `name:`.
+# Overlay patches stay keyed by the upstream basename, not the prefixed one.
 claude_skill_repos:
   - name: mattpocock/skills
+    prefix: matt
     skills:
       - skills/engineering/ask-matt
       - skills/engineering/code-review
@@ -36,6 +43,7 @@ claude_skill_repos:
       - skills/productivity/writing-for-agents
       - skills/in-progress/retro
   - name: cursor/plugins
+    prefix: cursor
     skills:
       - pstack/skills/technical-writing
       - pstack/skills/unslop

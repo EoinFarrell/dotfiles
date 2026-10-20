@@ -33,6 +33,7 @@
   ansible.builtin.include_tasks: materialize_one_skill_overlay.yaml
   vars:
     _basename: "{{ item.item.1 | basename }}"
+    _dest_name: "{{ item.item.0.prefix }}-{{ _basename }}"
     _src_dir: "{{ skill_clone_root }}/{{ item.item.0.name }}/{{ item.item.1 }}"
     _build_dir: "{{ build_dir_root }}/{{ _basename }}"
     _patch: "{{ item.stat.path }}"

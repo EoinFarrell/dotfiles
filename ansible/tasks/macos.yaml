@@ -32,15 +32,6 @@
     - vlc
     # - zoom
 
-- name: Remove Packages
-  community.general.homebrew:
-    name: "{{ item }}"
-    state: absent
-  loop:
-    - fzf
-  environment:
-    HOMEBREW_NO_AUTO_UPDATE: "1"
-
 - name: Install macOS-only Homebrew packages
   community.general.homebrew:
     name: "{{ item }}"
