@@ -51,3 +51,11 @@ claude_skill_repos:
     prefix: google
     skills:
       - skills/modern-web-guidance
+  - name: anthropics/skills
+    prefix: anthropic
+    skills:
+      - skills/frontend-design
+  - name: nextlevelbuilder/ui-ux-pro-max-skill
+    prefix: nlb
+    skills:
+      - .claude/skills/ui-ux-pro-max
