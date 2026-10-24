@@ -1,8 +1,8 @@
 # One iteration of the loop in materialize_skill_overlays.yaml, split into
 # its own file because Ansible blocks can't carry a `loop:` themselves.
 # Expects `item` (one entry of _skill_overlay_stats.results) plus the
-# per-iteration vars set by the calling loop: _basename, _src_dir,
-# _build_dir, _patch.
+# per-iteration vars set by the calling loop: _basename, _dest_name
+# (<repo prefix>-<basename>, the symlink name), _src_dir, _build_dir, _patch.
 - name: Check overlay patch applies cleanly against current upstream
   ansible.builtin.command:
     cmd: "git apply --check {{ _patch }}"
@@ -36,4 +36,4 @@
 
 - name: Record overlay result
   ansible.builtin.set_fact:
-    skill_overlay_results: "{{ skill_overlay_results + [{'basename': _basename, 'build_dir': _build_dir}] }}"
+    skill_overlay_results: "{{ skill_overlay_results + [{'basename': _basename, 'dest_name': _dest_name, 'build_dir': _build_dir}] }}"

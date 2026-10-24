@@ -1,0 +1,41 @@
+# Claude Code names a skill after the `name:` in its SKILL.md frontmatter,
+# not after the directory/symlink it lives in. Prefixing only the symlink
+# (matt-code-review, howdah-code-review) therefore leaves every copy showing
+# as plain `code-review` in /skills. This file builds, per skill, a copy of
+# the source dir whose frontmatter `name:` is rewritten to the prefixed name;
+# callers symlink that copy instead of the raw source.
+# Parameters (via `vars:`):
+#   prefixed_skills      - list of {src, dest_name} maps
+#   prefixed_build_root  - dir that receives one <dest_name>/ copy per skill
+#
+# One shell task for the whole list, not a task per skill: ~100 skills x 4
+# Ansible tasks made provisioning very slow. A source dir without SKILL.md
+# (e.g. a leftover empty dir) is skipped.
+- name: Materialize prefixed skill copies
+  ansible.builtin.shell: |
+    set -eu
+    expand() { case "$1" in "~"*) printf '%s' "$HOME${1#\~}" ;; *) printf '%s' "$1" ;; esac; }
+    root="$(expand '{{ prefixed_build_root }}')"
+    mkdir -p "$root"
+    while IFS='|' read -r src name; do
+      [ -n "$name" ] || continue
+      src="$(expand "$src")"
+      if [ ! -f "$src/SKILL.md" ]; then
+        echo "skipped $name: no SKILL.md in $src"
+        rm -rf "$root/$name"
+        continue
+      fi
+      rsync -a --delete "$src/" "$root/$name/"
+      if grep -q '^name:' "$root/$name/SKILL.md"; then
+        sed -i.bak "1,/^name:/ s/^name:.*/name: $name/" "$root/$name/SKILL.md"
+        rm -f "$root/$name/SKILL.md.bak"
+      fi
+    done <<'SKILLS'
+    {% for ps in prefixed_skills %}
+    {{ ps.src }}|{{ ps.dest_name }}
+    {% endfor %}
+    SKILLS
+  args:
+    executable: /bin/bash
+  register: _prefixed_skills_result
+  changed_when: false

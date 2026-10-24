@@ -72,6 +72,9 @@
     # basename, materialized into build_dir_root before linking.
     claude_skill_overlays_dir: "{{ playbook_dir }}/../claude/skill-overlays"
     claude_skill_build_dir_root: ~/Code/claude/.build
+    # Per-skill copies whose SKILL.md `name:` carries the repo prefix (Claude
+    # Code shows the frontmatter name, not the symlink name).
+    claude_prefixed_build_dir_root: ~/Code/claude/.build-prefixed
   tasks:
   - name: Setup Code dirs
     ansible.builtin.file:
@@ -134,14 +137,26 @@
       skill_clone_root: ~/Code/claude
       overlays_dir: "{{ claude_skill_overlays_dir }}"
       build_dir_root: "{{ claude_skill_build_dir_root }}"
-  - name: Build claude_dotfile_links from claude_skill_repos
+  - name: Build prefixed skill list from claude_skill_repos
     vars:
       _basename: "{{ item.1 | basename }}"
       _overlay_result: "{{ skill_overlay_results | selectattr('basename', 'equalto', _basename) | list }}"
       _src: "{{ _overlay_result[0].build_dir if _overlay_result | length > 0 else '~/Code/claude/' + item.0.name + '/' + item.1 }}"
     ansible.builtin.set_fact:
-      claude_dotfile_links: "{{ claude_dotfile_links | default([]) + [{'src': _src, 'dest': '~/.claude/skills/' + _basename}, {'src': _src, 'dest': '~/.agents/skills/' + _basename}] }}"
+      prefixed_skills: "{{ prefixed_skills | default([]) + [{'src': _src, 'dest_name': item.0.prefix + '-' + _basename}] }}"
     loop: "{{ claude_skill_repos | subelements('skills') }}"
+    loop_control:
+      label: "{{ item.1 | basename }}"
+  - name: Materialize prefixed skill copies (frontmatter name rewritten)
+    ansible.builtin.include_tasks: tasks/materialize_prefixed_skills.yaml
+    vars:
+      prefixed_build_root: "{{ claude_prefixed_build_dir_root }}"
+  - name: Build claude_dotfile_links from prefixed copies
+    ansible.builtin.set_fact:
+      claude_dotfile_links: "{{ claude_dotfile_links | default([]) + [{'src': claude_prefixed_build_dir_root + '/' + item.dest_name, 'dest': '~/.claude/skills/' + item.dest_name}, {'src': claude_prefixed_build_dir_root + '/' + item.dest_name, 'dest': '~/.agents/skills/' + item.dest_name}] }}"
+    loop: "{{ prefixed_skills }}"
+    loop_control:
+      label: "{{ item.dest_name }}"
   - name: Link Claude skills
     ansible.builtin.include_tasks: tasks/link_dotfiles.yaml
     vars:
