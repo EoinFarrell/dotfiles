@@ -13,6 +13,7 @@ Hermes image ships ruamel.yaml). Repos are cloned once and only updated with
 longer applies; that skill's previous build is left untouched.
 """
 import argparse
+import json
 import re
 import shutil
 import subprocess
@@ -36,7 +37,19 @@ class Result:
     built: list = field(default_factory=list)
     skipped: list = field(default_factory=list)
     pruned: list = field(default_factory=list)
+    overlaid: list = field(default_factory=list)
     failures: list = field(default_factory=list)
+
+
+def report(result):
+    return {
+        "built": result.built,
+        "skipped": result.skipped,
+        "pruned": result.pruned,
+        "overlays": result.overlaid,
+        "failures": [{"basename": f.basename, "patch": str(f.patch), "error": f.error}
+                     for f in result.failures],
+    }
 
 
 def load_repos(path):
@@ -87,7 +100,9 @@ def _replace_dir(staged, dest):
 
 
 def build(repos, clone_root, out_dir, overlays_dir, url_template=DEFAULT_URL_TEMPLATE,
-          update=False):
+          update=False, overlay_build_dir=None):
+    """overlay_build_dir: also keep each overlaid skill, patched but not yet
+    renamed, at <overlay_build_dir>/<basename> (the Ansible playbook's .build)."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     result = Result()
@@ -112,6 +127,13 @@ def build(repos, clone_root, out_dir, overlays_dir, url_template=DEFAULT_URL_TEM
                     if r.returncode:
                         result.failures.append(OverlayFailure(basename, patch, r.stderr.strip()))
                         continue
+                    if overlay_build_dir:
+                        kept = Path(overlay_build_dir) / basename
+                        kept.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copytree(staged, Path(stage_root) / f"{basename}.overlaid")
+                        _replace_dir(Path(stage_root) / f"{basename}.overlaid", kept)
+                        result.overlaid.append({"basename": basename, "dest_name": dest_name,
+                                                "build_dir": str(kept)})
                 skill_md = staged / "SKILL.md"
                 skill_md.write_text(rewrite_skill_name(skill_md.read_text(), dest_name))
                 _replace_dir(staged, out_dir / dest_name)
@@ -134,10 +156,19 @@ def main(argv=None):
     p.add_argument("--out", required=True, help="output dir; its skill dirs are managed here")
     p.add_argument("--url-template", default=DEFAULT_URL_TEMPLATE)
     p.add_argument("--update", action="store_true", help="git pull --ff-only existing clones")
+    p.add_argument("--overlay-build-dir",
+                   help="also write overlaid skills, patched but not renamed, here")
+    p.add_argument("--json", action="store_true",
+                   help="print a JSON report on stdout; overlay failures are in it, not the exit code")
     args = p.parse_args(argv)
 
-    result = build(load_repos(args.repos_file), args.clone_root, args.out,
-                   args.overlays_dir, args.url_template, args.update)
+    expand = lambda v: Path(v).expanduser() if v else v
+    result = build(load_repos(expand(args.repos_file)), expand(args.clone_root),
+                   expand(args.out), expand(args.overlays_dir), args.url_template,
+                   args.update, expand(args.overlay_build_dir))
+    if args.json:
+        print(json.dumps(report(result)))
+        return 0
     print(f"built {len(result.built)}, skipped {len(result.skipped)}, "
           f"pruned {len(result.pruned)}, failed {len(result.failures)}")
     for name in result.skipped:

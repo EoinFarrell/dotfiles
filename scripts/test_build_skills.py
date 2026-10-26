@@ -3,6 +3,7 @@
 Upstream repos are real local git repos cloned through a file:// URL template,
 so the clone/overlay/rename path runs end to end without network access.
 """
+import json
 import os
 import subprocess
 import tempfile
@@ -100,6 +101,33 @@ class BuildSkillsTest(unittest.TestCase):
         (self.overlays / "tdd.patch").write_text(patch)
         self.build([{"name": "o/skills", "prefix": "matt", "skills": ["s/tdd"]}])
         self.assertTrue((self.out / "matt-tdd/SKILL.md").read_text().endswith("extra\n"))
+
+    def test_overlay_build_dir_gets_unprefixed_copy_for_overlaid_skills_only(self):
+        repo = self.make_upstream("o/skills", {
+            "s/tdd/SKILL.md": SKILL, "s/other/SKILL.md": SKILL.replace("tdd", "other")})
+        (repo / "s/tdd/SKILL.md").write_text(SKILL + "extra\n")
+        (self.overlays / "tdd.patch").write_text(git(repo / "s/tdd", "diff", "--relative"))
+        git(repo, "checkout", "-q", "--", ".")
+        overlay_build = self.tmp / "build"
+        result = self.build([{"name": "o/skills", "prefix": "matt",
+                              "skills": ["s/tdd", "s/other"]}],
+                            overlay_build_dir=overlay_build)
+        # Patched but not yet renamed: the playbook's contract for ~/Code/claude/.build.
+        self.assertIn("name: tdd\n", (overlay_build / "tdd/SKILL.md").read_text())
+        self.assertTrue((overlay_build / "tdd/SKILL.md").read_text().endswith("extra\n"))
+        self.assertFalse((overlay_build / "other").exists())
+        self.assertEqual(result.overlaid, [
+            {"basename": "tdd", "dest_name": "matt-tdd", "build_dir": str(overlay_build / "tdd")}])
+
+    def test_report_is_json_serialisable(self):
+        self.make_upstream("o/skills", {"s/tdd/SKILL.md": SKILL})
+        (self.overlays / "tdd.patch").write_text("diff --git a/SKILL.md b/SKILL.md\n"
+                                                 "--- a/SKILL.md\n+++ b/SKILL.md\n"
+                                                 "@@ -1 +1 @@\n-nope\n+yes\n")
+        result = self.build([{"name": "o/skills", "prefix": "matt", "skills": ["s/tdd"]}])
+        report = json.loads(json.dumps(build_skills.report(result)))
+        self.assertEqual(report["failures"][0]["basename"], "tdd")
+        self.assertEqual(set(report), {"built", "skipped", "pruned", "overlays", "failures"})
 
     def test_drifted_overlay_is_reported_and_leaves_previous_build(self):
         self.make_upstream("o/skills", {

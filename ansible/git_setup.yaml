@@ -124,19 +124,37 @@
       path: ~/Code/claude
       state: directory
       recurse: yes
-  - name: Clone Claude skill repos
-    ansible.builtin.git:
-      repo: "https://github.com/{{ item.name }}.git"
-      dest: ~/Code/claude/{{ item.name }}
-      update: no
-    loop: "{{ claude_skill_repos }}"
-  - name: Materialize skill overlays
-    ansible.builtin.include_tasks: tasks/materialize_skill_overlays.yaml
-    vars:
-      skill_repos: "{{ claude_skill_repos }}"
-      skill_clone_root: ~/Code/claude
-      overlays_dir: "{{ claude_skill_overlays_dir }}"
-      build_dir_root: "{{ claude_skill_build_dir_root }}"
+  # scripts/build_skills.py does the clone (update: no semantics), overlay
+  # (ADR 0003) and prefixed-copy steps in one go so the Hermes container, which
+  # has no Ansible, builds identical skills from the same
+  # vars/claude_skill_repos.yaml. It runs under ansible_playbook_python because
+  # that interpreter always has a YAML parser. --json keeps a drifted overlay
+  # out of the exit code: it lands in skill_overlay_failures below and fails the
+  # play last, as before. tasks/materialize_*.yaml are no longer called from
+  # here; the satellite play may still include them, and relies on the
+  # skill_overlay_results / prefixed_skills facts and the .build dir set here.
+  - name: Build Claude skills (clone, overlay, prefix)
+    ansible.builtin.command:
+      argv:
+        - "{{ ansible_playbook_python }}"
+        - "{{ playbook_dir }}/../scripts/build_skills.py"
+        - --repos-file
+        - "{{ playbook_dir }}/vars/claude_skill_repos.yaml"
+        - --overlays-dir
+        - "{{ claude_skill_overlays_dir }}"
+        - --clone-root
+        - ~/Code/claude
+        - --out
+        - "{{ claude_prefixed_build_dir_root }}"
+        - --overlay-build-dir
+        - "{{ claude_skill_build_dir_root }}"
+        - --json
+    register: _build_skills
+    changed_when: false
+  - name: Record skill overlay results
+    ansible.builtin.set_fact:
+      skill_overlay_results: "{{ (_build_skills.stdout | from_json).overlays }}"
+      skill_overlay_failures: "{{ (_build_skills.stdout | from_json).failures }}"
   - name: Build prefixed skill list from claude_skill_repos
     vars:
       _basename: "{{ item.1 | basename }}"
@@ -147,10 +165,6 @@
     loop: "{{ claude_skill_repos | subelements('skills') }}"
     loop_control:
       label: "{{ item.1 | basename }}"
-  - name: Materialize prefixed skill copies (frontmatter name rewritten)
-    ansible.builtin.include_tasks: tasks/materialize_prefixed_skills.yaml
-    vars:
-      prefixed_build_root: "{{ claude_prefixed_build_dir_root }}"
   - name: Build claude_dotfile_links from prefixed copies
     ansible.builtin.set_fact:
       claude_dotfile_links: "{{ claude_dotfile_links | default([]) + [{'src': claude_prefixed_build_dir_root + '/' + item.dest_name, 'dest': '~/.claude/skills/' + item.dest_name}, {'src': claude_prefixed_build_dir_root + '/' + item.dest_name, 'dest': '~/.agents/skills/' + item.dest_name}] }}"
