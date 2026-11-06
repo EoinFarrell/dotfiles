@@ -26,7 +26,6 @@ claude_skill_repos:
       - skills/engineering/improve-codebase-architecture
       - skills/engineering/prototype
       - skills/engineering/research
-      - skills/engineering/resolving-merge-conflicts
       - skills/engineering/setup-matt-pocock-skills
       - skills/engineering/tdd
       - skills/engineering/to-spec
@@ -41,7 +40,7 @@ claude_skill_repos:
       - skills/productivity/to-questionnaire
       - skills/productivity/wait-what
       - skills/productivity/writing-for-agents
-      - skills/in-progress/retro
+      - skills/engineering/retro
   - name: cursor/plugins
     prefix: cursor
     skills:
