@@ -189,6 +189,26 @@
         Reconcile each overlay patch by hand (see the 'error' field on each
         entry for git apply's message) before re-running.
     when: skill_overlay_failures | length > 0
+  # tmux-agent-indicator: cloned straight into the path its hooks and
+  # agent-indicator.tmux expect (no installer, no TPM). Claude's hooks live in
+  # claude/tmux-agent-indicator-hooks.json and are merged into the
+  # machine-local ~/.claude/settings.json, which isn't a managed symlink.
+  - name: Clone tmux-agent-indicator
+    ansible.builtin.git:
+      repo: "https://github.com/accessd/tmux-agent-indicator.git"
+      dest: ~/.tmux/plugins/tmux-agent-indicator
+      update: yes
+  - name: Merge tmux-agent-indicator hooks into ~/.claude/settings.json
+    ansible.builtin.command:
+      argv:
+        - "{{ ansible_playbook_python }}"
+        - "{{ playbook_dir }}/../scripts/merge_claude_hooks.py"
+        - --fragment
+        - "{{ playbook_dir }}/../claude/tmux-agent-indicator-hooks.json"
+        - --marker
+        - tmux-agent-indicator
+    register: _claude_hooks
+    changed_when: _claude_hooks.stdout.strip() == 'changed'
   - name: Clone fzf-tab plugin
     ansible.builtin.git:
       repo: "https://github.com/Aloxaf/fzf-tab.git"
