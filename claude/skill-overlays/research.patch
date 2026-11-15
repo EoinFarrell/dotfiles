@@ -1,0 +1,20 @@
+diff --git a/SKILL.md b/SKILL.md
+index ffc9eb8..79e71b3 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: research
+-description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
++description: Investigate a question against high-trust primary sources and post the findings to the project issue tracker. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
+ ---
+ 
+ Spin up a **background agent** to do the research, so you keep working while it reads. Start it with a fresh context window.
+@@ -8,5 +8,5 @@ Spin up a **background agent** to do the research, so you keep working while it
+ Its job:
+ 
+ 1. Investigate the question against **primary sources** (official docs, source code, specs, first-party APIs), not a secondary write-up of them. Follow every claim back to the source that owns it.
+-2. Write the findings to a single Markdown file, citing each claim's source.
+-3. Save it where the repo already keeps such notes; match the existing convention, and if there is none, put it somewhere sensible and say where.
++2. Write the findings as Markdown, citing each claim's source.
++3. Publish them to the issue tracker, **not** as a file in the repo. The issue tracker should have been provided to you; if not, tell the user to run `/setup-matt-pocock-skills`. Post the findings as a comment on the issue the research belongs to (the one the user named, or the one the current work is about). If there is no such issue, create one for the topic first, then comment on it. If the findings exceed the tracker's comment size limit, split them into consecutive comments. Tell the user the issue number and link.
