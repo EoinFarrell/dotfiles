@@ -56,10 +56,25 @@ _ansibleProvision() {
     _pwfile=$(mktemp) || return 1
     chmod 600 "$_pwfile"
 
-    local _pw
-    printf '[sudo] password for provisioning: ' >&2
-    IFS= read -rs _pw
-    printf '\n' >&2
+    # Verify with `sudo -S -k -v` (reads stdin, ignores any cached timestamp)
+    # so a typo re-prompts here instead of failing mid-playbook.
+    local _pw _try
+    for _try in 1 2 3; do
+        printf '[sudo] password for provisioning: ' >&2
+        IFS= read -rs _pw
+        printf '\n' >&2
+        if printf '%s\n' "$_pw" | sudo -S -k -v 2>/dev/null; then
+            break
+        fi
+        echo "Sorry, try again." >&2
+        _pw=
+    done
+    sudo -k   # drop the validation timestamp; ansible authenticates itself
+    if [ -z "$_pw" ]; then
+        rm -f "$_pwfile"
+        echo "_ansibleProvision: no valid sudo password after 3 attempts." >&2
+        return 1
+    fi
     printf '%s\n' "$_pw" > "$_pwfile"
     unset _pw
 

@@ -72,16 +72,13 @@
     state: present
   become: true
 
-- name: Add Debian Contrib & Non-Free apt repo (steam)
+# contrib/non-free (steam) now come from /etc/apt/sources.list, which already
+# enables them; a second deb822 entry only produced "configured multiple
+# times" warnings on every apt update. Remove the one earlier runs created.
+- name: Remove duplicate Debian Contrib & Non-Free apt repo
   ansible.builtin.deb822_repository:
     name: debian-contrib-nonfree
-    types: deb
-    uris: http://deb.debian.org/debian
-    suites: "{{ ansible_facts['distribution_release'] }}"
-    components:
-      - contrib
-      - non-free
-    state: present
+    state: absent
   become: true
 
 # deb822_repository writes .sources files; the ansible.builtin.apt_repository

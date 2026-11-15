@@ -43,14 +43,46 @@
         upgrade: yes
         update_cache: yes
         cache_valid_time: 86400
+    # Debian 12 tops out at driver 535, but the Immich CUDA ML container (run on nr200p via the
+    # homelab repo) needs >= 545. NVIDIA's own Debian 12 repo supplies the 580 branch, the last one
+    # that supports Pascal (GTX 1080); 590+ drops it. nvidia-open is Turing+ only, so use the
+    # proprietary dkms driver. The pinning package must be installed before the driver so the
+    # second `upgrade: yes` below cannot jump to a newer branch.
+    - name: Install the NVIDIA CUDA repo keyring (adds the apt source and signing key)
+      ansible.builtin.apt:
+        deb: https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb
+      register: cuda_keyring
+    - name: Refresh apt cache after adding the NVIDIA CUDA repo
+      apt:
+        update_cache: true
+      when: cuda_keyring is changed
+    - name: Pin the NVIDIA driver to the 580 branch
+      ansible.builtin.apt:
+        name: nvidia-driver-pinning-580
+        state: present
     - name: Install NVIDIA driver
       apt:
         pkg:
-          - nvidia-driver
+          - cuda-drivers-580
           - firmware-misc-nonfree
         state: present
         update_cache: true
       register: nvidia_driver
+    # Swapping Debian's nvidia-kernel-common for NVIDIA's packages leaves the stock
+    # /etc/modprobe.d/nvidia.conf as nvidia.conf.dpkg-new, never applied, so nouveau keeps the GPU
+    # and nvidia-smi fails with "already bound to nouveau". Own the blacklist here instead of
+    # relying on that conffile.
+    - name: Blacklist nouveau so the NVIDIA module can bind the GPU
+      ansible.builtin.copy:
+        dest: /etc/modprobe.d/blacklist-nouveau.conf
+        content: |
+          blacklist nouveau
+          blacklist nova-core
+        mode: "0644"
+      register: nouveau_blacklist
+    - name: Rebuild the initramfs so nouveau is blocked at early boot
+      ansible.builtin.command: update-initramfs -u
+      when: nouveau_blacklist is changed
     # GPU in Docker containers on this host. The "nvidia" runtime entry itself lives in the
     # homelab repo's ansible/files/docker/daemon.nr200p.eoinf.com.json (setup_agent.yaml), so do
     # NOT run `nvidia-ctk runtime configure` here: it would rewrite /etc/docker/daemon.json.
@@ -98,7 +130,7 @@
       register: reboot_required_file
     - name: Reboot the server (if required).
       ansible.builtin.reboot:
-      when: reboot_required_file.stat.exists or nvidia_driver is changed
+      when: reboot_required_file.stat.exists or nvidia_driver is changed or nouveau_blacklist is changed
     - name: Remove dependencies that are no longer required.
       ansible.builtin.apt:
         autoremove: yes
