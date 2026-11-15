@@ -17,10 +17,16 @@
   # conflicting formulae are installed"). ADR-0001 chose tealdeer, so this
   # unconditionally clears the way for it rather than requiring a manual
   # `brew uninstall tldr` per machine. No-op if tldr was never installed.
+  # Uses `brew` directly rather than community.general.homebrew: that module
+  # fails with "No available formula" once the formula is gone from
+  # homebrew/core, even for state=absent.
   # See: https://github.com/EoinFarrell/dotfiles/issues/17
-  community.general.homebrew:
-    name: tldr
-    state: absent
+  ansible.builtin.shell: |
+    if brew list --formula tldr >/dev/null 2>&1; then
+      brew uninstall --formula tldr && echo removed
+    fi
+  register: tldr_removal
+  changed_when: "'removed' in tldr_removal.stdout"
   environment:
     HOMEBREW_NO_AUTO_UPDATE: "1"
 
