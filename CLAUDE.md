@@ -10,4 +10,4 @@ Five canonical labels map one-to-one: needs-triage, needs-info, ready-for-agent,
 
 ### Domain docs
 
-Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Single-context: `CONTEXT.md` at the repo root, ADRs as issues labelled `adr`. See `docs/agents/domain.md`.

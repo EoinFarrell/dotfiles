@@ -1,6 +1,6 @@
 ---
 # The one place to add a new user/CLI tool for both macOS and Debian.
-# See docs/adr/0001-homebrew-for-user-cli-tools.md for the reasoning.
+# See ADR on issue #12 for the reasoning.
 #
 # OS-level packages (daemons, kernel modules, drivers) do NOT belong here —
 # they stay in the OS-specific apt tasks in ansible/tasks/debian.yaml, or
@@ -8,7 +8,7 @@
 homebrew_packages:
   - ansible
   # asdf itself (the runtime-version manager) — not a language runtime, so
-  # it belongs here rather than under docs/adr/0002-asdf-for-language-runtimes.md's
+  # it belongs here rather than under the ADR on issue #14's
   # asdf/.tool-versions. Modern asdf (0.16+) ships as a standalone binary,
   # not the old git-cloned shell-script install tasks/asdf_tool_versions.yaml
   # used to assume — see that file's history for what broke.

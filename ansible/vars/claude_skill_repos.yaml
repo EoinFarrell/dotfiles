@@ -4,7 +4,7 @@
 # its own vars file (rather than inlined in git_setup.yaml) so the
 # satellite repo's own playbook (ansible/setup.yaml in
 # $DOTFILES_WD) can load the same source of truth via vars_files when
-# resolving a skill overlay's upstream path (ADR 0003) — the satellite
+# resolving a skill overlay's upstream path (ADR on issue #24) — the satellite
 # depends on the root here, never the other way round.
 #
 # `prefix` is required per repo. Each skill is linked as

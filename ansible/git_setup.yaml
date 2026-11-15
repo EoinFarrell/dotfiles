@@ -68,7 +68,7 @@
       - ~/.claude/skills
       - ~/.agents/skills
 
-    # ADR 0003: per-skill overlay patches, keyed by destination symlink
+    # ADR on issue #24: per-skill overlay patches, keyed by destination symlink
     # basename, materialized into build_dir_root before linking.
     claude_skill_overlays_dir: "{{ playbook_dir }}/../claude/skill-overlays"
     claude_skill_build_dir_root: ~/Code/claude/.build
@@ -125,7 +125,7 @@
       state: directory
       recurse: yes
   # scripts/build_skills.py does the clone (update: no semantics), overlay
-  # (ADR 0003) and prefixed-copy steps in one go so the Hermes container, which
+  # (ADR on issue #24) and prefixed-copy steps in one go so the Hermes container, which
   # has no Ansible, builds identical skills from the same
   # vars/claude_skill_repos.yaml. It runs under ansible_playbook_python because
   # that interpreter always has a YAML parser. --json keeps a drifted overlay
@@ -179,7 +179,7 @@
       prune_unmanaged: true
   - name: Fail if any skill overlay could not be applied
     # Runs last so every other skill still gets linked this run — a
-    # drifted overlay reports loudly (ADR 0003) rather than blocking
+    # drifted overlay reports loudly (ADR on issue #24) rather than blocking
     # provisioning for skills unrelated to it.
     ansible.builtin.fail:
       msg: >-

@@ -117,7 +117,7 @@
     pkg:
       # OS-level packages and Linuxbrew's own system dependencies only.
       # User/CLI tools live in vars/homebrew_packages.yml instead — see
-      # docs/adr/0001-homebrew-for-user-cli-tools.md.
+      # ADR on issue #12.
       - apt-transport-https
       - build-essential
       - ca-certificates

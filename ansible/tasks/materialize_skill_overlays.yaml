@@ -1,4 +1,4 @@
-# Overlay engine for claude_skill_repos (issue #24 / ADR 0003). Included
+# Overlay engine for claude_skill_repos (issue #24 / ADR on issue #24). Included
 # from git_setup.yaml. Parameters (set via `vars:` on the include_tasks
 # call):
 #   skill_repos        - claude_skill_repos-shaped list ({name, skills})
